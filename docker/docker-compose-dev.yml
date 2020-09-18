@@ -1,0 +1,58 @@
+version: '3.4'
+
+services:
+  crocoplan-api_server-dev:
+    container_name: crocoplan-api_server-dev
+    image: crocoplan-api_server-dev
+    build:
+      context: ../api-server
+      target: common-stage
+    ports:
+      - "8000:8000"
+    command: bash -x -c 'while ! nc -vz crocoplan-db_dev 3306; do sleep 1; done && composer install && php bin/console doctrine:schema:create && symfony server:start --no-tls'
+    volumes:
+      - ../api-server:/api-server
+      - ./data/.symfony:/.symfony
+      - ./data/.composer:/.composer
+    user: ${CURRENT_USER:?"Lancez cette commande 'CURRENT_USER=$(id -u):$(id -g) docker-compose -f docker/docker-compose-dev.yml up'"}
+    networks:
+      crocoplan-dev:
+
+  crocoplan-db_dev:
+    container_name: crocoplan-db_dev
+    image: mysql:5.6 # mysql:5.6.49
+    environment:
+      - MYSQL_ROOT_PASSWORD=crocoplan
+      - MYSQL_DATABASE=crocoplan
+      - MYSQL_USER=crocoplan
+      - MYSQL_PASSWORD=crocoplan
+    ports:
+      - "3306:3306"
+    networks:
+      crocoplan-dev:
+
+#  crocoplan-client_app-dev:
+#    container_name: crocoplan-client_app-dev
+#    image: crocoplan-client_app-dev
+#    build:
+#      context: ../client-app
+#      target: common-stage
+#    ports:
+#      - "8080:8080"
+#    working_dir: /client-app
+#    command: sh -c "yarn install && quasar dev"
+#    volumes:
+#      - ../client-app:/client-app
+#      - ./data/.config:/.config
+#      - ./data/.quasar-starter-kits:/.quasar-starter-kits
+#      - ./data/.yarn:/.yarn
+#      - ./data/.yarnrc:/.yarnrc
+#      - ./data/.cache:/.cache
+#      - ./data/.npm:/.npm
+#    user: ${CURRENT_USER:?"Lancez cette commande 'CURRENT_USER=$(id -u):$(id -g) docker-compose -f docker/docker-compose-dev.yml up'"}
+#    networks:
+#      crocoplan-dev:
+
+networks:
+  crocoplan-dev:
+
