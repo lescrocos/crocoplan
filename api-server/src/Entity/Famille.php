@@ -64,7 +64,7 @@ class Famille
     public $parents;
 
     /**
-     * @var Garde[] Les gardes affectées de la famille
+     * @var Garde[] Les gardes affectées à cette famille
      *
      * @ORM\OneToMany(targetEntity="Garde", mappedBy="famille")
      */

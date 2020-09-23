@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -54,6 +55,19 @@ class Enfant
      * @ORM\JoinColumn(nullable=false)
      */
     public $famille;
+
+    /**
+     * @var PresenceJourPlanning[] Les présences / absences de cet enfant
+     *
+     * @ORM\OneToMany(targetEntity="PresenceJourPlanning", mappedBy="enfant")
+     */
+    public $presencesJourPlanning;
+
+
+    public function __construct()
+    {
+        $this->presencesJourPlanning = new ArrayCollection();
+    }
 
 
     public function getId(): ?int

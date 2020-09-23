@@ -29,28 +29,18 @@ class Garde
     private $id;
 
     /**
-     * @var DateTime La date de la garde
-     *
-     * @ORM\Column(type="date")
-     * @Assert\NotNull
-     */
-    public $date;
-
-    /**
      * @var DateTime L'heure de début de la garde
      *
      * @ORM\Column(type="time")
-     * @Assert\NotNull
      */
-    public $heureDebut;
+    public $heureArrivee;
 
     /**
      * @var DateTime L'heure de fin de la garde
      *
      * @ORM\Column(type="time")
-     * @Assert\NotNull
      */
-    public $heureFin;
+    public $heureDepart;
 
     /**
      * @var string Commentaire concernant la garde
@@ -63,9 +53,17 @@ class Garde
     /**
      * @var DateTime La version de cette garde (permet "l'optimistic-locking" https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/reference/transactions-and-concurrency.html#optimistic-locking )
      *
-     * @ORM\Version @ORM\Column(type="datetime")
+     * @ORM\Version @ORM\Column(type="datetime", nullable=false)
      */
     public $version;
+
+    /**
+     * @var JourPlanning Le jour de planning de cette garde
+     *
+     * @ORM\ManyToOne(targetEntity="JourPlanning", inversedBy="gardes")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    public $jourPlanning;
 
     /**
      * @var Famille La famille qui est affectée à la garde
