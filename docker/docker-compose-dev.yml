@@ -9,7 +9,7 @@ services:
       target: common-stage
     ports:
       - "8000:8000"
-    command: bash -x -c 'while ! nc -vz crocoplan-db_dev 3306; do sleep 1; done && composer install && php bin/console doctrine:schema:create && symfony server:start --no-tls'
+    command: bash -x -c 'while ! nc -vz crocoplan-db_dev 3306; do sleep 1; done && composer install && php bin/console doctrine:schema:update --force && symfony server:start --no-tls'
     volumes:
       - ../api-server:/api-server
       - ./data/.symfony:/.symfony

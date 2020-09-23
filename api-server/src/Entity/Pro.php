@@ -7,16 +7,15 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Un parent
+ * Un·e professionnel·le
  * @package App\Entity
  * @ORM\Entity
- * @ORM\Table(name="parent")
- * @ApiResource(shortName="Parent")
+ * @ApiResource
  */
-class CParent
+class Pro
 {
     /**
-     * @var int ID du parent
+     * @var int ID du·de la professionnel·le
      *
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -25,7 +24,7 @@ class CParent
     private $id;
 
     /**
-     * @var string Le nom du parent
+     * @var string Le nom du·de la professionnel·le
      *
      * @ORM\Column
      * @Assert\NotBlank
@@ -33,20 +32,13 @@ class CParent
     public $nom;
 
     /**
-     * @var string|null L'email du parent
+     * @var string|null L'email du·de la professionnel·le
      *
      * @ORM\Column(nullable=true)
      * @Assert\Email
      */
     public $email;
 
-    /**
-     * @var Famille La famille du parent
-     *
-     * @ORM\ManyToOne(targetEntity="Famille", inversedBy="parents")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    public $famille;
 
     public function getId(): ?int
     {

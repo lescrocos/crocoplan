@@ -32,11 +32,29 @@ class Enfant
     public $nom;
 
     /**
+     * @var DateTime La date d'entrée de l'enfant à la crèche
+     *
+     * @ORM\Column(type="date")
+     * @Assert\NotNull
+     */
+    public $dateEntree;
+
+    /**
+     * @var DateTime La date de sortie de l'enfant de la crèche
+     *
+     * @ORM\Column(type="date")
+     * @Assert\NotNull
+     */
+    public $dateSortie;
+
+    /**
      * @var Famille La famille de l'enfant
      *
      * @ORM\ManyToOne(targetEntity="Famille", inversedBy="enfants")
+     * @ORM\JoinColumn(nullable=false)
      */
     public $famille;
+
 
     public function getId(): ?int
     {

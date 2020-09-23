@@ -63,10 +63,28 @@ class Famille
      */
     public $parents;
 
+    /**
+     * @var Garde[] Les gardes affectées de la famille
+     *
+     * @ORM\OneToMany(targetEntity="Garde", mappedBy="famille")
+     */
+    public $gardes;
+
+    /**
+     * @var Garde[] Les gardes disponibles de la famille
+     *
+     * @ORM\ManyToMany(targetEntity="Garde", inversedBy="famillesDisponibles")
+     * @ORM\JoinTable(name="garde_famille_disponible")
+     */
+    public $gardesDisponibles;
+
 
     public function __construct()
     {
         $this->enfants = new ArrayCollection();
+        $this->parents = new ArrayCollection();
+        $this->gardes = new ArrayCollection();
+        $this->gardesDisponibles = new ArrayCollection();
     }
 
 
