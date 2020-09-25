@@ -7,14 +7,12 @@ use MyCLabs\Enum\Enum;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * List des types possibles d'absence d'un enfant ou d'une professionnelle
+ * List des types possibles d'absence d'une professionnelle
  */
-class AbsenceType extends Enum
+class AbsenceProType extends Enum
 {
 
     const ABSENT = 'ABSENT';
-
-    // Valeurs d'absence pour les pros //
 
     const RTT = 'RTT';
 
@@ -22,8 +20,10 @@ class AbsenceType extends Enum
 
     const CS = 'CS';
 
-    // Valeurs d'absence pour les pros et enfants //
+    const CONGE_MALADIE = 'CONGE_MALADIE';
 
-    const MALADIE = 'MALADIE';
+    const ENFANT_MALADE = 'ENFANT_MALADE';
+
+    const OFF = 'OFF';
 
 }

@@ -41,16 +41,16 @@ class Pro
     public $email;
 
     /**
-     * @var PresenceJourPlanning[] Les présences / absences de ce·tte pro
+     * @var PresencePro[] Les présences / absences de ce·tte pro
      *
-     * @ORM\OneToMany(targetEntity="PresenceJourPlanning", mappedBy="pro")
+     * @ORM\OneToMany(targetEntity="PresencePro", mappedBy="pro")
      */
-    public $presencesJourPlanning;
+    public $presences;
 
 
     public function __construct()
     {
-        $this->presencesJourPlanning = new ArrayCollection();
+        $this->presences = new ArrayCollection();
     }
 
 

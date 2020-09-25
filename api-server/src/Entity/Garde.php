@@ -58,7 +58,7 @@ class Garde
     public $version;
 
     /**
-     * @var JourPlanning Le jour de planning de cette garde
+     * @var CoefFamille Le jour de planning de cette garde
      *
      * @ORM\ManyToOne(targetEntity="JourPlanning", inversedBy="gardes")
      * @ORM\JoinColumn(nullable=false)

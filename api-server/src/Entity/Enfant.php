@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
@@ -49,6 +50,20 @@ class Enfant
     public $dateSortie;
 
     /**
+     * @var DateTime La date de début d'adaptation de cet enfant
+     *
+     * @ORM\Column(type="date", nullable=true)
+     */
+    public $debutAdaptation;
+
+    /**
+     * @var DateTime La date de fin d'adaptation de cet enfant
+     *
+     * @ORM\Column(type="date", nullable=true)
+     */
+    public $finAdaptation;
+
+    /**
      * @var Famille La famille de l'enfant
      *
      * @ORM\ManyToOne(targetEntity="Famille", inversedBy="enfants")
@@ -57,16 +72,16 @@ class Enfant
     public $famille;
 
     /**
-     * @var PresenceJourPlanning[] Les présences / absences de cet enfant
+     * @var PresenceEnfant[] Les présences / absences de cet enfant
      *
-     * @ORM\OneToMany(targetEntity="PresenceJourPlanning", mappedBy="enfant")
+     * @ORM\OneToMany(targetEntity="PresenceEnfant", mappedBy="enfant")
      */
-    public $presencesJourPlanning;
+    public $presences;
 
 
     public function __construct()
     {
-        $this->presencesJourPlanning = new ArrayCollection();
+        $this->presences = new ArrayCollection();
     }
 
 

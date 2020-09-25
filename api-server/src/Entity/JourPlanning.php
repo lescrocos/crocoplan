@@ -40,13 +40,27 @@ class JourPlanning
      */
     public $commentaire;
 
+    /**
+     * @var CoefFamille le mois planning de ce jour
+     *
+     * @ORM\ManyToOne(targetEntity="MoisPlanning", inversedBy="joursPlanning")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    public $moisPlanning;
 
     /**
-     * @var PresenceJourPlanning[] Les présences pros / enfants
+     * @var PresenceEnfant[] Les présences enfants
      *
-     * @ORM\OneToMany(targetEntity="PresenceJourPlanning", mappedBy="jourPlanning")
+     * @ORM\OneToMany(targetEntity="PresenceEnfant", mappedBy="jourPlanning")
      */
-    public $presencesJourPlanning;
+    public $presencesEnfants;
+
+    /**
+     * @var PresencePro[] Les présences pros
+     *
+     * @ORM\OneToMany(targetEntity="PresencePro", mappedBy="jourPlanning")
+     */
+    public $presencesPros;
 
     /**
      * @var Garde[] Les gardes parent
@@ -58,7 +72,8 @@ class JourPlanning
 
     public function __construct()
     {
-        $this->presencesJourPlanning = new ArrayCollection();
+        $this->presencesEnfants = new ArrayCollection();
+        $this->presencesPros = new ArrayCollection();
         $this->gardes = new ArrayCollection();
     }
 
