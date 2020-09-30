@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * Un jour de planning
@@ -30,6 +31,8 @@ class JourPlanning
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull
+     *
+     * @Groups({"garde"})
      */
     public $date;
 

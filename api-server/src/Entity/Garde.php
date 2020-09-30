@@ -8,13 +8,19 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 
 /**
  * Une garde de parent
  * @package App\Entity
  * @ORM\Entity
- * @ApiResource
+ * @ApiResource(normalizationContext={"groups"={"garde"}})
+ * @ApiFilter(SearchFilter::class, properties={"famille": "exact"})
+ * @ApiFilter(DateFilter::class, properties={"jourPlanning.date"})
  */
 class Garde
 {
@@ -25,6 +31,8 @@ class Garde
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *
+     * @Groups({"garde"})
      */
     private $id;
 
@@ -32,6 +40,8 @@ class Garde
      * @var DateTime L'heure de début de la garde
      *
      * @ORM\Column(type="time")
+     *
+     * @Groups({"garde"})
      */
     public $heureArrivee;
 
@@ -39,6 +49,8 @@ class Garde
      * @var DateTime L'heure de fin de la garde
      *
      * @ORM\Column(type="time")
+     *
+     * @Groups({"garde"})
      */
     public $heureDepart;
 
@@ -47,6 +59,8 @@ class Garde
      *
      * @ORM\Column(nullable=true)
      * @Assert\NotBlank
+     *
+     * @Groups({"garde"})
      */
     public $commentaire;
 
@@ -58,10 +72,12 @@ class Garde
     public $version;
 
     /**
-     * @var CoefFamille Le jour de planning de cette garde
+     * @var JourPlanning Le jour de planning de cette garde
      *
      * @ORM\ManyToOne(targetEntity="JourPlanning", inversedBy="gardes")
      * @ORM\JoinColumn(nullable=false)
+     *
+     * @Groups({"garde"})
      */
     public $jourPlanning;
 

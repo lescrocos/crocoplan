@@ -19,6 +19,16 @@ Pour supprimer les données de la base et la ré-initialiser :
 CURRENT_USER=$(id -u):$(id -g) docker-compose -f docker/docker-compose-dev.yml down --volumes
 ```
 
+## Génération des entités côté client (TypeScript)
+On suit https://api-platform.com/docs/client-generator/typescript/ , on se connecte d'abord à la partie cliente
+```bash
+docker exec -it crocoplan-client_app-dev sh
+```
+Puis :
+```bash
+npx @api-platform/client-generator --generator typescript http://crocoplan-api_server-dev:8000/api src/
+```
+
 # Historique de création du projet (À NE PAS EXÉCUTER, il s'agit juste d'historique)
 ## Partie `api-server`
 ```bash
