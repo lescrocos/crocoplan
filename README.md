@@ -19,6 +19,16 @@ Pour supprimer les données de la base et la ré-initialiser :
 CURRENT_USER=$(id -u):$(id -g) docker-compose -f docker/docker-compose-dev.yml down --volumes
 ```
 
+## Initialisation d'une fausse base de donnée côtée serveur
+On suit https://api-platform.com/docs/client-generator/typescript/ , on se connecte d'abord à la partie cliente
+```bash
+docker exec -it crocoplan-api_server-dev bash
+```
+Puis :
+```bash
+php bin/console doctrine:fixtures:load
+```
+
 ## Génération des entités côté client (TypeScript)
 On suit https://api-platform.com/docs/client-generator/typescript/ , on se connecte d'abord à la partie cliente
 ```bash

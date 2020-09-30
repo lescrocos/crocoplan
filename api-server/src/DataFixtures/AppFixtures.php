@@ -16,9 +16,19 @@ use Faker;
 
 class AppFixtures extends Fixture
 {
+
+    private $faker;
+
+
+    public function __construct()
+    {
+        $this->faker = Faker\Factory::create('fr_FR');
+    }
+
+
     public function load(ObjectManager $manager)
     {
-        $faker = Faker\Factory::create('fr_FR');
+        $faker = $this->faker;
 
         $familles = [];
 
@@ -70,24 +80,12 @@ class AppFixtures extends Fixture
                     $manager->persist($jourPlanning);
 
                     // Création d'une garde d'ouverture, de 2 du matin et de 2 de l'après-midi, avec une chance sur 2 qu'elle soit pourvu par une famille
-                    $garde = $this->nouvelleGarde($jourPlanning);
-                    $garde->heureArrivee = new DateTime('8:00');
-                    $garde->heureDepart = new DateTime('9:30');
-                    $this->assigneFamille($garde, $familles);
-                    $manager->persist($garde);
+                    $this->creerGarde($jourPlanning, '8:00', '9:30', $familles, $manager);
                     for ($j = 0; $j < 2; $j++) {
-                        $garde = $this->nouvelleGarde($jourPlanning);
-                        $garde->heureArrivee = new DateTime('9:30');
-                        $garde->heureDepart = new DateTime('13:30');
-                        $this->assigneFamille($garde, $familles);
-                        $manager->persist($garde);
+                        $this->creerGarde($jourPlanning, '9:30', '13:30', $familles, $manager);
                     }
                     for ($j = 0; $j < 2; $j++) {
-                        $garde = $this->nouvelleGarde($jourPlanning);
-                        $garde->heureArrivee = new DateTime('13:30');
-                        $garde->heureDepart = new DateTime('18:30');
-                        $this->assigneFamille($garde, $familles);
-                        $manager->persist($garde);
+                        $this->creerGarde($jourPlanning, '13:30', '18:30', $familles, $manager);
                     }
                 }
             }
@@ -103,7 +101,7 @@ class AppFixtures extends Fixture
      * @param Famille[] $familles
      */
     public function assigneFamille(Garde $garde, array $familles) {
-        if (rand(0, 1) == 0) { // 1 chance sur 2
+        if ($this->faker->boolean(66)) { // 2 chances sur 3
             $garde->famille = $familles[rand(0, sizeof($familles) - 1)];
         }
     }
@@ -113,5 +111,24 @@ class AppFixtures extends Fixture
         $garde = new Garde();
         $garde->jourPlanning = $jourPlanning;
         return $garde;
+    }
+
+    private function creerGarde(JourPlanning $jourPlanning, string $heureArrivee, string $heureDepart, array $familles, ObjectManager $manager)
+    {
+        $faker = $this->faker;
+
+        $garde = new Garde();
+        $garde->jourPlanning = $jourPlanning;
+        $garde->heureArrivee = new DateTime($heureArrivee);
+        $garde->heureDepart = new DateTime($heureDepart);
+        // assignation d'une famille aléatoirement
+        if ($faker->boolean(66)) { // 2 chances sur 3
+            $garde->famille = $familles[rand(0, sizeof($familles) - 1)];
+        }
+        // commentaire aléatoire
+        if ($faker->boolean(10)) { // 1 chances sur 10
+            $garde->commentaire = $faker->realText(40);
+        }
+        $manager->persist($garde);
     }
 }
