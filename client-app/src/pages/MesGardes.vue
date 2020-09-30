@@ -2,7 +2,7 @@
   <q-page padding>
     <div class="row">
       <div class="col-12">
-        <q-input v-model="idFamille" label="ID famille" v-on:blur="initByDate()" />
+        <q-select filled v-model="idFamille" :options="familles" label="Famille" option-value="id" option-label="nom" v-on:input="initByDate()" emit-value map-options />
       </div>
     </div>
     <div class="row">
@@ -34,10 +34,13 @@ import { Garde } from 'src/interfaces/garde'
 import { date } from 'quasar'
 import { gardeService } from 'src/services/garde.service'
 import { dateUtils } from 'src/utils/date.utils';
+import { familleService } from 'src/services/famille.service';
+import { Famille } from 'src/interfaces/famille';
 
 @Component
 export default class MesGardes extends Vue {
-  idFamille = '1' // TODO à supprimer
+  idFamille = '' // TODO à supprimer
+  familles?: Famille[] // TODO à supprimer
   date?: string
   nomMois?: string
   jourMois?: string
@@ -48,6 +51,7 @@ export default class MesGardes extends Vue {
   gardesDetails: {jour: string, heureArrivee: string, heureDepart: string, commentaire: string}[] = []
 
   async created() {
+    familleService.findAll().then(familles => this.familles = familles)
     await this.initByDate(new Date())
   }
 
