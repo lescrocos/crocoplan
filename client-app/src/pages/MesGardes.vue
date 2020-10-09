@@ -1,11 +1,6 @@
 <template>
   <q-page padding>
     <div class="row">
-      <div class="col-12">
-        <q-select filled v-model="idFamille" :options="familles" label="Famille" option-value="id" option-label="nom" v-on:input="initByDate()" emit-value map-options />
-      </div>
-    </div>
-    <div class="row">
       <div class="col-sm-auto col-xs-12">
         <q-date
           v-model="date"
@@ -38,18 +33,22 @@ import { gardeService } from 'src/services/garde.service'
 import { dateUtils } from 'src/utils/date.utils';
 import { familleService } from 'src/services/famille.service';
 import { Famille } from 'src/interfaces/famille';
+import { familleStore } from 'src/store/famille.store';
+import { Watch } from 'vue-property-decorator';
 
 @Component
 export default class MesGardes extends Vue {
-  idFamille = '' // TODO à supprimer
-  familles: Famille[] = [] // TODO à supprimer
   date?: string
+  dateObj?: Date
   nomMois?: string
   jourMois = ''
   annee?: number
+  familleId?: string
   gardes: Garde[] = []
   events: string[] = []
   gardesDetails: {jour: string, heureArrivee: string, heureDepart: string, commentaire?: string}[] = []
+
+  familleStore = familleStore
 
   async created() {
     familleService.findAll().then(familles => this.familles = familles)
@@ -57,22 +56,23 @@ export default class MesGardes extends Vue {
   }
 
   async initByDate(initDate?: Date) {
-    if (initDate === undefined) { // TODO à supprimer
-      initDate = this.date ? dateUtils.qDateToDate(this.date) : new Date()
-    }
     this.date = dateUtils.dateToQDate(initDate)
-    this.jourMois = dateUtils.dateToJourComplet(initDate);
+    this.dateObj = initDate
+    this.jourMois = dateUtils.dateToJourComplet(initDate)
     const nomMois = date.formatDate(initDate, 'MMMM')
-    const annee = initDate.getFullYear();
+    const annee = initDate.getFullYear()
+    const familleId = familleStore.state.familleSelectionnee?.id
 
-    const premierJourDuMois = date.startOfDate(initDate, 'month')
-    const dernierJourDuMois = date.endOfDate(initDate, 'month')
-
-    if (nomMois !== this.nomMois || annee !== this.annee) {
+    if (nomMois !== this.nomMois || annee !== this.annee || familleId !== this.familleId) {
       this.nomMois = nomMois
       this.annee = annee
+      this.familleId = familleId
+
+      const premierJourDuMois = date.startOfDate(initDate, 'month')
+      const dernierJourDuMois = date.endOfDate(initDate, 'month')
+
       // On récupère les gardes entre ces 2 dates pour cette famille
-      this.gardes = await gardeService.findAllByFamilleIriAndJourPlanningDateBetween(`/api/familles/${this.idFamille}`, premierJourDuMois, dernierJourDuMois)
+      this.gardes = await gardeService.findAllByFamilleIriAndJourPlanningDateBetween(`/api/familles/${familleStore.state.familleSelectionnee?.id}`, premierJourDuMois, dernierJourDuMois)
       // On transforme les dates des jours planning pour l'affichage des évènements dans le QDate
       this.events = this.gardes.map(garde => dateUtils.dateToQDate(garde.jourPlanning.date))
       // On transforme ces mêmes dates pour afficher correctement les gardes dans la liste
@@ -90,8 +90,12 @@ export default class MesGardes extends Vue {
   }
 
   async navigation(view: {year: number, month: number}) {
-
     await this.initByDate(date.buildDate(view) as Date)
+  }
+
+  @Watch('familleStore.state.familleSelectionnee')
+  async familleSelectionnee() {
+    await this.initByDate(this.dateObj)
   }
 
 }

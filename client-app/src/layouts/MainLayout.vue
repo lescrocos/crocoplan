@@ -15,6 +15,8 @@
           Planning Crocos
         </q-toolbar-title>
 
+        <q-select filled :value="familleStore.state.familleSelectionnee" :options="familles" label="Famille" option-label="nom" @input="changeFamille" />
+
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
@@ -59,6 +61,9 @@ const linksData = [
 ]
 
 import { Vue, Component } from 'vue-property-decorator'
+import { familleStore } from 'src/store/famille.store';
+import { Famille } from 'src/interfaces/famille';
+import { familleService } from 'src/services/famille.service';
 
 @Component({
   components: { EssentialLink }
@@ -66,5 +71,16 @@ import { Vue, Component } from 'vue-property-decorator'
 export default class MainLayout extends Vue {
   leftDrawerOpen = false;
   essentialLinks = linksData;
+  familleStore = familleStore;
+  familles: Famille[] = null
+
+  async created() {
+    this.familles = await familleService.findAll()
+  }
+
+  changeFamille(famille: Famille) {
+    familleStore.selectionneFamille(famille)
+  }
+
 }
 </script>
