@@ -18,7 +18,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
  * Une garde de parent
  * @package App\Entity
  * @ORM\Entity
- * @ApiResource(normalizationContext={"groups"={"garde"}})
+ * @ApiResource(normalizationContext={"groups"={"garde"}}, attributes={"pagination_client_enabled"=true})
  * @ApiFilter(SearchFilter::class, properties={"famille": "exact"})
  * @ApiFilter(DateFilter::class, properties={"jourPlanning.date"})
  */

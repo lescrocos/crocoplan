@@ -9,10 +9,12 @@
       <div class="col-sm-auto col-xs-12">
         <q-date
           v-model="date"
+          @input="input"
           :events="events"
-          v-on:navigation="navigation"
+          @navigation="navigation"
           event-color="orange"
           :title="jourMois"
+          today-btn
         />
       </div>
       <div class="col-sm col-xs-12 q-ml-md">
@@ -40,15 +42,14 @@ import { Famille } from 'src/interfaces/famille';
 @Component
 export default class MesGardes extends Vue {
   idFamille = '' // TODO à supprimer
-  familles?: Famille[] // TODO à supprimer
+  familles: Famille[] = [] // TODO à supprimer
   date?: string
   nomMois?: string
-  jourMois?: string
-  premierLundiDuMois?: Date
-  dernierVendrediDuMois?: Date
+  jourMois = ''
+  annee?: number
   gardes: Garde[] = []
   events: string[] = []
-  gardesDetails: {jour: string, heureArrivee: string, heureDepart: string, commentaire: string}[] = []
+  gardesDetails: {jour: string, heureArrivee: string, heureDepart: string, commentaire?: string}[] = []
 
   async created() {
     familleService.findAll().then(familles => this.familles = familles)
@@ -60,43 +61,37 @@ export default class MesGardes extends Vue {
       initDate = this.date ? dateUtils.qDateToDate(this.date) : new Date()
     }
     this.date = dateUtils.dateToQDate(initDate)
-    this.jourMois = dateUtils.dateToJourComplet(initDate)
-    this.nomMois = date.formatDate(initDate, 'MMMM')
+    this.jourMois = dateUtils.dateToJourComplet(initDate);
+    const nomMois = date.formatDate(initDate, 'MMMM')
+    const annee = initDate.getFullYear();
 
-    this.premierLundiDuMois = date.startOfDate(initDate, 'month')
-    // Recherche du premier lundi
-    while (this.premierLundiDuMois.getDay() !== 1) {
-      this.premierLundiDuMois = date.addToDate(this.premierLundiDuMois, { days: 1 })
+    const premierJourDuMois = date.startOfDate(initDate, 'month')
+    const dernierJourDuMois = date.endOfDate(initDate, 'month')
+
+    if (nomMois !== this.nomMois || annee !== this.annee) {
+      this.nomMois = nomMois
+      this.annee = annee
+      // On récupère les gardes entre ces 2 dates pour cette famille
+      this.gardes = await gardeService.findAllByFamilleIriAndJourPlanningDateBetween(`/api/familles/${this.idFamille}`, premierJourDuMois, dernierJourDuMois)
+      // On transforme les dates des jours planning pour l'affichage des évènements dans le QDate
+      this.events = this.gardes.map(garde => dateUtils.dateToQDate(garde.jourPlanning.date))
+      // On transforme ces mêmes dates pour afficher correctement les gardes dans la liste
+      this.gardesDetails = this.gardes.map(garde => ({
+        jour: dateUtils.dateToJourComplet(garde.jourPlanning.date),
+        heureArrivee: dateUtils.dateToHeure(garde.heureArrivee),
+        heureDepart: dateUtils.dateToHeure(garde.heureDepart),
+        commentaire: garde.commentaire
+      }))
     }
-    // Recherche du dernier vendredi de la semaine du dernier lundi
-    // On recherche d'abord le dernier lundi
-    this.dernierVendrediDuMois = date.endOfDate(initDate, 'month')
-    while (this.dernierVendrediDuMois.getDay() !== 1) {
-      this.dernierVendrediDuMois = date.subtractFromDate(this.dernierVendrediDuMois, { days: 1 })
-    }
-    // Puis on recherche le vendredi de cette semaine
-    while (this.dernierVendrediDuMois.getDay() !== 5) {
-      this.dernierVendrediDuMois = date.addToDate(this.dernierVendrediDuMois, { days: 1 })
-    }
-    // On récupère les gardes entre ces 2 dates pour cette famille
-    this.gardes = await gardeService.findByFamilleIriAndJourPlanningDateBetween(`/api/familles/${this.idFamille}`, this.premierLundiDuMois, this.dernierVendrediDuMois)
-    // On transforme les dates des jours planning pour l'affichage des évènements dans le QDate
-    this.events = this.gardes.map(garde => dateUtils.dateToQDate(garde.jourPlanning?.date))
-    // On transforme ces mêmes dates pour afficher correctement les gardes dans la liste
-    this.gardesDetails = this.gardes.map(garde => ({
-      jour: dateUtils.dateToJourComplet(garde.jourPlanning?.date),
-      heureArrivee: dateUtils.dateToHeure(garde.heureArrivee),
-      heureDepart: dateUtils.dateToHeure(garde.heureDepart),
-      commentaire: garde.commentaire
-    }))
   }
 
-  // input(value: string, reason: string, details: any) {
-  //   console.log({value, reason, details})
-  // }
+  async input(value: string, reason: string, details: any) {
+    await this.initByDate(dateUtils.qDateToDate(value))
+  }
 
   async navigation(view: {year: number, month: number}) {
-    await this.initByDate(date.buildDate(view))
+
+    await this.initByDate(date.buildDate(view) as Date)
   }
 
 }
