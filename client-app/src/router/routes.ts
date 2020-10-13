@@ -5,8 +5,9 @@ const routes: RouteConfig[] = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Index.vue') },
-      { path: 'mes-gardes', component: () => import('pages/MesGardes.vue') }
+      { path: '', redirect: 'mes-gardes' },
+      { path: 'mes-gardes', component: () => import('pages/MesGardes.vue') },
+      { path: 'appels-a-garde', component: () => import('pages/AppelsAGarde.vue') },
     ]
   },
 

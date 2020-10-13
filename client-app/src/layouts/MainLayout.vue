@@ -58,6 +58,12 @@ const linksData = [
     icon: 'perm_contact_calendar',
     link: '/mes-gardes'
   },
+  {
+    title: 'Appels à gardes',
+    caption: 'Liste des appels à garde',
+    icon: 'notification_important',
+    link: '/appels-a-garde'
+  },
 ]
 
 import { Vue, Component } from 'vue-property-decorator'
@@ -72,7 +78,7 @@ export default class MainLayout extends Vue {
   leftDrawerOpen = false;
   essentialLinks = linksData;
   familleStore = familleStore;
-  familles: Famille[] = null
+  familles: Famille[] | null = null
 
   async created() {
     this.familles = await familleService.findAll()

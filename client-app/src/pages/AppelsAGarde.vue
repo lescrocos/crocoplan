@@ -13,7 +13,7 @@
         />
       </div>
       <div class="col-sm col-xs-12 q-ml-md">
-        <div class="text-h4 q-mb-md">Mes gardes sur {{nomMois}}</div>
+        <div class="text-h4 q-mb-md">Appels à garde sur {{nomMois}}</div>
         <ul>
           <li v-for="gardeDetail in gardesDetails">
             {{gardeDetail.jour}} de {{gardeDetail.heureArrivee}} à {{gardeDetail.heureDepart}}<span v-if="gardeDetail.commentaire"> ({{gardeDetail.commentaire}})</span>
@@ -35,13 +35,12 @@ import { familleStore } from 'src/store/famille.store'
 import { Watch } from 'vue-property-decorator'
 
 @Component
-export default class MesGardes extends Vue {
+export default class AppelsAGarde extends Vue {
   date?: string
   dateObj?: Date
   nomMois?: string
   jourMois = ''
   annee?: number
-  familleId?: string
   gardes: Garde[] = []
   events: string[] = []
   gardesDetails: {jour: string, heureArrivee: string, heureDepart: string, commentaire?: string}[] = []
@@ -58,18 +57,16 @@ export default class MesGardes extends Vue {
     this.jourMois = dateUtils.dateToJourComplet(initDate)
     const nomMois = date.formatDate(initDate, 'MMMM')
     const annee = initDate.getFullYear()
-    const familleId = familleStore.state.familleSelectionnee?.id
 
-    if (nomMois !== this.nomMois || annee !== this.annee || familleId !== this.familleId) {
+    if (nomMois !== this.nomMois || annee !== this.annee) {
       this.nomMois = nomMois
       this.annee = annee
-      this.familleId = familleId
 
       const premierJourDuMois = date.startOfDate(initDate, 'month')
       const dernierJourDuMois = date.endOfDate(initDate, 'month')
 
       // On récupère les gardes entre ces 2 dates pour cette famille
-      this.gardes = await gardeService.findAllByFamilleIriAndJourPlanningDateBetween(`/api/familles/${familleStore.state.familleSelectionnee?.id}`, premierJourDuMois, dernierJourDuMois)
+      this.gardes = await gardeService.findAllByFamilleIriAndJourPlanningDateBetween(null, premierJourDuMois, dernierJourDuMois)
       // On transforme les dates des jours planning pour l'affichage des évènements dans le QDate
       this.events = this.gardes.map(garde => dateUtils.dateToQDate(garde.jourPlanning.date))
       // On transforme ces mêmes dates pour afficher correctement les gardes dans la liste
@@ -88,11 +85,6 @@ export default class MesGardes extends Vue {
 
   async navigation(view: {year: number, month: number}) {
     await this.initByDate(date.buildDate(view) as unknown as Date) // TODO supprimer le cast dès que https://github.com/quasarframework/quasar/pull/7888 est rentré dans la version courante
-  }
-
-  @Watch('familleStore.state.familleSelectionnee')
-  async familleSelectionnee() {
-    await this.initByDate(this.dateObj || new Date())
   }
 
 }

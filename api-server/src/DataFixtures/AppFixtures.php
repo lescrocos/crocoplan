@@ -79,7 +79,7 @@ class AppFixtures extends Fixture
 
                     $manager->persist($jourPlanning);
 
-                    // Création d'une garde d'ouverture, de 2 du matin et de 2 de l'après-midi, avec une chance sur 2 qu'elle soit pourvu par une famille
+                    // Création d'une garde d'ouverture, de 2 du matin et de 2 de l'après-midi
                     $this->creerGarde($jourPlanning, '8:00', '9:30', $familles, $manager);
                     for ($j = 0; $j < 2; $j++) {
                         $this->creerGarde($jourPlanning, '9:30', '13:30', $familles, $manager);
@@ -101,7 +101,7 @@ class AppFixtures extends Fixture
      * @param Famille[] $familles
      */
     public function assigneFamille(Garde $garde, array $familles) {
-        if ($this->faker->boolean(66)) { // 2 chances sur 3
+        if ($this->faker->boolean(90)) { // 9 chances sur 10
             $garde->famille = $familles[rand(0, sizeof($familles) - 1)];
         }
     }
