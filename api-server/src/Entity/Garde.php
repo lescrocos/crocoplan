@@ -8,18 +8,24 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
 
 /**
  * Une garde de parent
  * @package App\Entity
  * @ORM\Entity
- * @ApiResource(normalizationContext={"groups"={"garde"}}, attributes={"pagination_client_enabled"=true})
+ * @ApiResource(
+ *     normalizationContext={"groups"={"garde"}},
+ *     attributes={"pagination_client_enabled"=true},
+ * )
  * @ApiFilter(SearchFilter::class, properties={"famille": "exact"})
+ * @ApiFilter(ExistsFilter::class, properties={"famille"})
  * @ApiFilter(DateFilter::class, properties={"jourPlanning.date"})
  */
 class Garde
@@ -32,7 +38,7 @@ class Garde
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      *
-     * @Groups({"garde"})
+     * @Groups({"garde", "mes_dispos_du_mois"})
      */
     private $id;
 
@@ -41,7 +47,7 @@ class Garde
      *
      * @ORM\Column(type="time")
      *
-     * @Groups({"garde"})
+     * @Groups({"garde", "mes_dispos_du_mois"})
      */
     public $heureArrivee;
 
@@ -50,7 +56,7 @@ class Garde
      *
      * @ORM\Column(type="time")
      *
-     * @Groups({"garde"})
+     * @Groups({"garde", "mes_dispos_du_mois"})
      */
     public $heureDepart;
 
@@ -60,7 +66,7 @@ class Garde
      * @ORM\Column(nullable=true)
      * @Assert\NotBlank
      *
-     * @Groups({"garde"})
+     * @Groups({"garde", "mes_dispos_du_mois"})
      */
     public $commentaire;
 
@@ -77,7 +83,7 @@ class Garde
      * @ORM\ManyToOne(targetEntity="JourPlanning", inversedBy="gardes")
      * @ORM\JoinColumn(nullable=false)
      *
-     * @Groups({"garde"})
+     * @Groups({"garde", "mes_dispos_du_mois"})
      */
     public $jourPlanning;
 
@@ -91,20 +97,28 @@ class Garde
     /**
      * @var Famille[] Les familles disponibles pour cette garde
      *
-     * @ORM\ManyToMany(targetEntity="Famille", mappedBy="gardesDisponibles")
+     * @ORM\ManyToMany(targetEntity="Famille")
+     * @ORM\JoinTable(name="garde_famille_disponible")
+     * @ApiSubresource
      */
-    public $familleDisponibles;
+    public $famillesDisponibles;
 
 
     public function __construct()
     {
-        $this->familleDisponibles = new ArrayCollection();
+        $this->famillesDisponibles = new ArrayCollection();
     }
 
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function addFamilleDisponible(Famille $famille) {
+        if (!$this->famillesDisponibles->contains($famille)) {
+            $this->famillesDisponibles->add($famille);
+        }
     }
 
 }

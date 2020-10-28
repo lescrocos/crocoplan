@@ -29,7 +29,7 @@ class PresenceEnfant
     private $id;
 
     /**
-     * @var boolean true si l'enfant est présent, false sinon
+     * @var bool true si l'enfant est présent, false sinon
      *
      * @ORM\Column(nullable=true)
      */

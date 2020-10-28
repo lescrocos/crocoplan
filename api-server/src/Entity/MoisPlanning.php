@@ -6,7 +6,9 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiProperty;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * Un mois de planning
@@ -18,6 +20,7 @@ class MoisPlanning
 {
     /**
      * @var int ID du jour de planning
+     * @ApiProperty(identifier=false)
      *
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -26,10 +29,23 @@ class MoisPlanning
     private $id;
 
     /**
+     * @var string Le code du mois avec ce format 'Y-m' par exemple '2020-02'
+     * @ApiProperty(identifier=true)
+     *
+     * @ORM\Column(length=7, unique=true)
+     * @Assert\NotNull
+     *
+     * @Groups({"mes_dispos_du_mois"})
+     */
+    public $code;
+
+    /**
      * @var DateTime La date du premier lundi de ce mois planning
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull
+     *
+     * @Groups({"mes_dispos_du_mois"})
      */
     public $dateDebut;
 
@@ -38,6 +54,8 @@ class MoisPlanning
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull
+     *
+     * @Groups({"mes_dispos_du_mois"})
      */
     public $dateFin;
 
@@ -45,11 +63,13 @@ class MoisPlanning
      * @var string Commentaire de ce mois de planning
      *
      * @ORM\Column(nullable=true)
+     *
+     * @Groups({"mes_dispos_du_mois"})
      */
     public $commentaire;
 
     /**
-     * @var CommentaireFamilleMoisPlanning[] Les présences enfants
+     * @var JourPlanning[] Les jours planning de ce mois
      *
      * @ORM\OneToMany(targetEntity="JourPlanning", mappedBy="moisPlanning")
      */

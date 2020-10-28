@@ -29,7 +29,7 @@ class PresencePro
     private $id;
 
     /**
-     * @var boolean true si la·le pro est présent·e, false sinon
+     * @var bool true si la·le pro est présent·e, false sinon
      *
      * @ORM\Column(nullable=true)
      */

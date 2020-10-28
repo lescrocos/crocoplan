@@ -13,16 +13,20 @@ use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
 
 class AppFixtures extends Fixture
 {
 
     private $faker;
 
+    const NOMBRE_DE_FAMILLES = 20;
+
 
     public function __construct()
     {
         $this->faker = Faker\Factory::create('fr_FR');
+        $this->faker->seed(1);
     }
 
 
@@ -33,7 +37,7 @@ class AppFixtures extends Fixture
         $familles = [];
 
         // Création de 20 familles
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < AppFixtures::NOMBRE_DE_FAMILLES; $i++) {
             $famille = new Famille();
             $famille->nom = $faker->firstName();
             $famille->dateEntree = $faker->dateTimeBetween('-1 year', 'now');
@@ -42,7 +46,7 @@ class AppFixtures extends Fixture
             $familles[] = $famille;
 
             // Création des enfants
-            $nbEnfants = $i % 20 == 0 ? 2 : 1; // 1 famille sur 20 aura 2 enfants
+            $nbEnfants = $i % AppFixtures::NOMBRE_DE_FAMILLES == 0 ? 2 : 1; // 1 famille sur 20 aura 2 enfants
             for ($j = 0; $j < $nbEnfants; $j++) {
                 $enfant = new Enfant();
                 if ($j == 0) {
@@ -66,6 +70,7 @@ class AppFixtures extends Fixture
         $moisPrecedent = new DateTime(date("Y-m-d", strtotime("last month")));
         for ($i = 0; $i < 12; $i++) {
             $moisPlanning = new MoisPlanning();
+            $moisPlanning->code = $moisPrecedent->format('Y-m');
             $moisPlanning->dateDebut = new DateTime(date("Y-m-d", strtotime("first monday of {$moisPrecedent->format('Y-m')}")));
             $moisPlanning->dateFin = new DateTime(date("Y-m-d", strtotime("friday this week", strtotime("last monday of {$moisPrecedent->format('Y-m')}"))));
             $manager->persist($moisPlanning);
@@ -102,15 +107,8 @@ class AppFixtures extends Fixture
      */
     public function assigneFamille(Garde $garde, array $familles) {
         if ($this->faker->boolean(90)) { // 9 chances sur 10
-            $garde->famille = $familles[rand(0, sizeof($familles) - 1)];
+            $garde->famille = $this->getRandomFamille($familles);
         }
-    }
-
-    private function nouvelleGarde(JourPlanning $jourPlanning)
-    {
-        $garde = new Garde();
-        $garde->jourPlanning = $jourPlanning;
-        return $garde;
     }
 
     private function creerGarde(JourPlanning $jourPlanning, string $heureArrivee, string $heureDepart, array $familles, ObjectManager $manager)
@@ -122,13 +120,27 @@ class AppFixtures extends Fixture
         $garde->heureArrivee = new DateTime($heureArrivee);
         $garde->heureDepart = new DateTime($heureDepart);
         // assignation d'une famille aléatoirement
-        if ($faker->boolean(66)) { // 2 chances sur 3
+        if ($faker->boolean(90)) {
             $garde->famille = $familles[rand(0, sizeof($familles) - 1)];
         }
         // commentaire aléatoire
         if ($faker->boolean(10)) { // 1 chances sur 10
             $garde->commentaire = $faker->realText(40);
         }
+        // familles disponibles
+        $nbFamillesDisponibles = $faker->biasedNumberBetween(0, AppFixtures::NOMBRE_DE_FAMILLES, function($x) { return 1 - $x; });
+        for ($i = 0; $i < $nbFamillesDisponibles; $i++) {
+            $garde->addFamilleDisponible($this->getRandomFamille($familles));
+        }
         $manager->persist($garde);
+    }
+
+    /**
+     * @param Famille[] $familles
+     * @return Famille
+     */
+    private function getRandomFamille(array $familles): Famille
+    {
+        return $familles[$this->faker->numberBetween(0, sizeof($familles) - 1)];
     }
 }

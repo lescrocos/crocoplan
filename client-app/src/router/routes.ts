@@ -8,6 +8,7 @@ const routes: RouteConfig[] = [
       { path: '', redirect: 'mes-gardes' },
       { path: 'mes-gardes', component: () => import('pages/MesGardes.vue') },
       { path: 'appels-a-garde', component: () => import('pages/AppelsAGarde.vue') },
+      { path: 'mes-dispos', component: () => import('pages/MesDispos.vue') },
     ]
   },
 

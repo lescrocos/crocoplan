@@ -32,7 +32,7 @@ class JourPlanning
      * @ORM\Column(type="date")
      * @Assert\NotNull
      *
-     * @Groups({"garde"})
+     * @Groups({"garde", "mes_dispos_du_mois"})
      */
     public $date;
 
@@ -44,7 +44,7 @@ class JourPlanning
     public $commentaire;
 
     /**
-     * @var CoefFamille le mois planning de ce jour
+     * @var MoisPlanning le mois planning de ce jour
      *
      * @ORM\ManyToOne(targetEntity="MoisPlanning", inversedBy="joursPlanning")
      * @ORM\JoinColumn(nullable=false)

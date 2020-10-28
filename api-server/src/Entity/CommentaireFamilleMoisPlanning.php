@@ -6,6 +6,7 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * Représente le commentaire que peut laisser une famille à destination de la famille Planning 1 pour réaliser le planning du mois
@@ -22,6 +23,8 @@ class CommentaireFamilleMoisPlanning
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *
+     * @Groups({"mes_dispos_du_mois"})
      */
     private $id;
 
@@ -29,11 +32,13 @@ class CommentaireFamilleMoisPlanning
      * @var string Instructions
      *
      * @ORM\Column
+     *
+     * @Groups({"mes_dispos_du_mois"})
      */
     public $commentaire;
 
     /**
-     * @var CoefFamille le mois planning de ce jour
+     * @var MoisPlanning le mois planning de ce jour
      *
      * @ORM\ManyToOne(targetEntity="MoisPlanning")
      * @ORM\JoinColumn(nullable=false)

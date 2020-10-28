@@ -64,6 +64,12 @@ const linksData = [
     icon: 'notification_important',
     link: '/appels-a-garde'
   },
+  {
+    title: 'Mes dispos',
+    caption: 'Mes disponibilités de garde pour un mois donné',
+    icon: 'playlist_add_check',
+    link: '/mes-dispos'
+  },
 ]
 
 import { Vue, Component } from 'vue-property-decorator'
