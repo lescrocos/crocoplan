@@ -1,8 +1,7 @@
-import { httpService } from './http.service'
-import { Famille } from 'src/interfaces/famille'
+import { httpService } from './http.service';
 
 abstract class AbstractService<T> {
-  private resourcePrefix: string
+  private readonly resourcePrefix: string
 
   protected constructor(resourcePrefix: string) {
     this.resourcePrefix = resourcePrefix
