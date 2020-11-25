@@ -1,16 +1,15 @@
 import { MoisPlanning } from 'src/interfaces/moisplanning';
 import { CommentaireFamilleMoisPlanning } from 'src/interfaces/commentairefamillemoisplanning';
-import { GardeDisponible } from 'src/interfaces/garde-disponible';
+import { Garde } from 'src/interfaces/garde';
 
 export interface MesDisposDuMoisUpdate {
   code?: string;
   gardesDisponiblesIds?: string[];
 }
 
-export interface MesDisposDuMois {
+export interface MesDisposDuMois extends MesDisposDuMoisUpdate {
   '@id'?: string;
-  code?: string;
   moisPlanning?: MoisPlanning;
   commentaireFamilleMoisPlanning?: CommentaireFamilleMoisPlanning;
-  gardesDisponibles?: GardeDisponible[];
+  gardes: Garde[];
 }

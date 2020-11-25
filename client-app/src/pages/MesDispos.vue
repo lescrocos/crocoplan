@@ -15,12 +15,10 @@
       <div class="col-sm col-xs-12 q-ml-md">
         <div class="text-h4 q-mb-md">Mes dispos sur {{nomMois}}</div>
         <ul>
-          <li v-for="gardeDisponible in mesDisposDuMois.gardesDisponibles">
-            <template v-for="gardeAffichable in [gardesAffichablesByGardeId.get(gardeDisponible.garde.id)]">
-              <q-checkbox v-model="gardeDisponible.familleDisponible">
-                {{gardeAffichable.jour}} de {{gardeAffichable.heureArrivee}} à {{gardeAffichable.heureDepart}}<span v-if="gardeDisponible.garde.commentaire"> ({{gardeDisponible.garde.commentaire}})</span>
-              </q-checkbox>
-            </template>
+          <li v-for="gardeDisponible in gardesDisponibles">
+            <q-checkbox v-model="gardeDisponible.familleDisponible">
+              {{gardeDisponible.gardeAffichable.jour}} de {{gardeDisponible.gardeAffichable.heureArrivee}} à {{gardeDisponible.gardeAffichable.heureDepart}}<span v-if="gardeDisponible.garde.commentaire"> ({{gardeDisponible.garde.commentaire}})</span>
+            </q-checkbox>
           </li>
         </ul>
         <q-btn @click="sauvegarder">
@@ -32,19 +30,23 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
-import { Garde } from 'src/interfaces/garde'
-import { date } from 'quasar'
-import { gardeService } from 'src/services/garde.service'
-import { dateUtils } from 'src/utils/date.utils'
-import { familleStore } from 'src/store/famille.store'
-import { Watch } from 'vue-property-decorator'
-import { mesDisposDuMoisService } from 'src/services/mes-dispos-du-mois.service'
-import { MesDisposDuMois } from 'src/interfaces/mesdisposdumois'
-import { GardeDisponible } from 'src/interfaces/garde-disponible'
-import { GardeAffichable } from 'src/interfaces/garde-affichable'
-import { gardeUtils } from 'src/utils/garde.utils'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Garde } from 'src/interfaces/garde';
+import { date } from 'quasar';
+import { dateUtils } from 'src/utils/date.utils';
+import { familleStore } from 'src/store/famille.store';
+import { Watch } from 'vue-property-decorator';
+import { mesDisposDuMoisService } from 'src/services/mes-dispos-du-mois.service';
+import { MesDisposDuMois } from 'src/interfaces/mesdisposdumois';
+import { GardeAffichable } from 'src/interfaces/garde-affichable';
+import { gardeUtils } from 'src/utils/garde.utils';
+
+interface GardeDisponible {
+  gardeAffichable: GardeAffichable;
+  garde: Garde;
+  familleDisponible?: boolean;
+}
 
 @Component
 export default class MesDispos extends Vue {
@@ -54,10 +56,10 @@ export default class MesDispos extends Vue {
   jourMois = ''
   annee?: number
   familleId?: string
-  mesDisposDuMois: MesDisposDuMois = {gardesDisponibles: []}
+  mesDisposDuMois: MesDisposDuMois = {gardes: []}
   events: string[] = []
-  gardesAffichablesByGardeId: Map<string, GardeAffichable>
-  gardesDisponiblesByJourPlanningQDate: Map<string, GardeDisponible[]>
+  gardesDisponibles: GardeDisponible[] = []
+  gardesDisponiblesByJourPlanningQDate: Map<string, GardeDisponible[]> = new Map<string, GardeDisponible[]>()
 
   familleStore = familleStore
 
@@ -92,11 +94,16 @@ export default class MesDispos extends Vue {
     this.mesDisposDuMois = mesDisposDuMois
 
     // On garde dans un coin les gardes affichables
-    this.gardesAffichablesByGardeId = gardeUtils.gardesToGardeAffichableMappedByGardeId(this.mesDisposDuMois.gardesDisponibles.map(gardeDisponible => gardeDisponible.garde))
+    const gardesDisponiblesIdsSet = new Set(mesDisposDuMois.gardesDisponiblesIds)
+    this.gardesDisponibles = this.mesDisposDuMois.gardes.map(garde => ({
+      garde,
+      gardeAffichable: gardeUtils.gardeToGardeAffichable(garde),
+      familleDisponible: gardesDisponiblesIdsSet.has(garde.id)
+    }))
 
     // On les regroupe par jour pour pouvoir plus tard savoir si on a un événement de coché pour ce jour
     this.gardesDisponiblesByJourPlanningQDate = new Map<string, GardeDisponible[]>()
-    this.mesDisposDuMois.gardesDisponibles.forEach(gardeDisponible => {
+    this.gardesDisponibles.forEach(gardeDisponible => {
       const jourPlanningQDate = dateUtils.dateToQDate(gardeDisponible.garde.jourPlanning.date)
       const gardesDisponibles = this.gardesDisponiblesByJourPlanningQDate.get(jourPlanningQDate) || []
       gardesDisponibles.push(gardeDisponible)
@@ -129,9 +136,9 @@ export default class MesDispos extends Vue {
   }
 
   async sauvegarder() {
-    const gardesDisponiblesIds = (this.mesDisposDuMois.gardesDisponibles || [])
+    const gardesDisponiblesIds = (this.gardesDisponibles)
       .filter(gardeDisponible => gardeDisponible.familleDisponible)
-      .map(gardeDisponible => gardeDisponible.garde?.id) as string[]
+      .map(gardeDisponible => gardeDisponible.garde.id) as string[]
     const mesDisposDuMois = await mesDisposDuMoisService.update({
       code: this.mesDisposDuMois.code,
       gardesDisponiblesIds

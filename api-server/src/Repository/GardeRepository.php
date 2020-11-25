@@ -37,41 +37,28 @@ class GardeRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $idGarde
      * @param int $idFamille
-     * @return bool
+     * @param string $codeMoisPlanning
+     * @return int[] les id des gardes pour lesquelles la famille passée en paramètre est disponible pour le mois sélectionné
      * @throws DBALException
      */
-    public function isFamilleDisponibleByGardeIdAndFamilleId(int $idGarde, int $idFamille): bool
-    {
-        $result = $this->getEntityManager()->getConnection()
-            ->executeQuery(
-                'SELECT 1 FROM garde_famille_disponible
-                 WHERE garde_id = :idGarde AND famille_id = :idFamille',
-                ["idGarde" => $idGarde, "idFamille" => $idFamille]
-            )
-            ->fetch();
-        return is_array($result) && sizeof($result) == 1;
-
-        // Version + lente en DQL
-//        $result = $this->getEntityManager()->createQuery('
-//            SELECT 1 FROM App\Entity\Garde g, App\Entity\Famille f
-//            WHERE g.id = :idGarde AND f.id = :idFamille AND f MEMBER OF g.famillesDisponibles
-//        ')
-//            ->setParameter('idGarde', $idGarde)
-//            ->setParameter('idFamille', $idFamille)
-//            ->getResult();
-//        return sizeof($result) == 1;
-
-        // Version qui ne fonctionne pas
-//        $result = $this->getEntityManager()->createNativeQuery('
-//            SELECT 1 FROM garde_famille_disponible
-//            WHERE garde_id = :idGarde AND famille_id = :idFamille
-//        ', new ResultSetMapping())
-//            ->setParameter('idGarde', $idGarde)
-//            ->setParameter('idFamille', $idFamille)
-//            ->getResult();
-//        return sizeof($result) == 1;
+    public function getIdsGardesDisponiblesByIdFamilleAndIdsGardesAndCodeMoisPlanning(int $idFamille, string $codeMoisPlanning) {
+        $em = $this->getEntityManager();
+        $params["idFamille"] = $idFamille;
+        $params["codeMoisPlanning"] = $codeMoisPlanning;
+        $pdoStatement = $em->getConnection()->executeQuery('
+                SELECT garde_id FROM garde_famille_disponible
+                WHERE famille_id = :idFamille
+                  AND garde_id IN (
+                    SELECT g.id
+                    FROM garde g
+                      JOIN jour_planning j ON g.jour_planning_id = j.id
+                      JOIN mois_planning m ON j.mois_planning_id = m.id
+                    WHERE m.code = :codeMoisPlanning
+                  )
+            ', $params);
+        $results = $pdoStatement->fetchAll();
+        return array_map(function ($item) { return (int)$item["garde_id"]; }, $results);
     }
 
     /**

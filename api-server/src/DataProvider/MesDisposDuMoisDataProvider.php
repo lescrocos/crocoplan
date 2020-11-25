@@ -6,11 +6,11 @@ namespace App\DataProvider;
 
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
-use App\Entity\NoDb\GardeDisponible;
 use App\Entity\NoDb\MesDisposDuMois;
 use App\Repository\CommentaireFamilleMoisPlanningRepository;
 use App\Repository\GardeRepository;
 use App\Repository\MoisPlanningRepository;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 
 class MesDisposDuMoisDataProvider implements ItemDataProviderInterface, RestrictedDataProviderInterface
@@ -44,6 +44,7 @@ class MesDisposDuMoisDataProvider implements ItemDataProviderInterface, Restrict
         if ($operationName == "get") {
             return $this->getMesDisposDuMois($codeMoisPlanning, $idFamille);
         } else {
+            // Inutile de faire des requêtes pour rien lorsque l'on sauvegarde : on ne va donc pas faire appel à la méthode de récupération des dispos du mois
             return new MesDisposDuMois();
         }
     }
@@ -53,6 +54,7 @@ class MesDisposDuMoisDataProvider implements ItemDataProviderInterface, Restrict
      * @param string $idFamille
      * @return MesDisposDuMois
      * @throws NonUniqueResultException
+     * @throws DBALException
      */
     public function getMesDisposDuMois(string $codeMoisPlanning, string $idFamille): MesDisposDuMois
     {
@@ -66,14 +68,8 @@ class MesDisposDuMoisDataProvider implements ItemDataProviderInterface, Restrict
         $mesDisposDuMois->commentaireFamilleMoisPlanning = $this->commentaireFamilleMoisPlanningRepository->findOneByMoisPlanningIdAndFamilleId($mesDisposDuMois->moisPlanning->getId(), $idFamille);
 
         // Ajout des gardes du mois
-        $gardes = $this->gardeRepository->findByJourPlanningMoisPlanningCode($codeMoisPlanning);
-        foreach ($gardes as $garde) {
-            $gardeDisponible = new GardeDisponible();
-            $gardeDisponible->garde = $garde;
-            // Ajout de la disponibilité de la famille sur cette garde
-            $gardeDisponible->familleDisponible = $this->gardeRepository->isFamilleDisponibleByGardeIdAndFamilleId($garde->getId(), $idFamille);
-            $mesDisposDuMois->gardesDisponibles[] = $gardeDisponible;
-        }
+        $mesDisposDuMois->gardes = $this->gardeRepository->findByJourPlanningMoisPlanningCode($codeMoisPlanning);
+        $mesDisposDuMois->gardesDisponiblesIds = $this->gardeRepository->getIdsGardesDisponiblesByIdFamilleAndIdsGardesAndCodeMoisPlanning($idFamille, $codeMoisPlanning);
 
         return $mesDisposDuMois;
     }

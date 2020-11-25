@@ -6,6 +6,7 @@ namespace App\Entity\NoDb;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\CommentaireFamilleMoisPlanning;
+use App\Entity\Garde;
 use App\Entity\MoisPlanning;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -46,24 +47,18 @@ class MesDisposDuMois
     public $commentaireFamilleMoisPlanning;
 
     /**
-     * @var GardeDisponible[] Les gardes du mois avec l'état de disponibilité de la famille pour chacune
+     * @var Garde[] Les gardes du mois
      *
      * @Groups({"mes_dispos_du_mois:read"})
      */
-    public $gardesDisponibles;
+    public $gardes = [];
 
     /**
      * @var int[] Les ids des gardes de ce mois pour lesquelles la famille est disponible
      *
-     * @Groups({"mes_dispos_du_mois:write"})
+     * @Groups({"mes_dispos_du_mois"})
      */
-    public $gardesDisponiblesIds;
+    public $gardesDisponiblesIds = [];
 
-
-    public function __construct()
-    {
-        $this->gardesDisponibles = [];
-        $this->gardesDisponiblesIds = [];
-    }
 
 }
