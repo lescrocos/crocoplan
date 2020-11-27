@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -11,7 +10,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @package App\Entity
  * @ORM\Entity
  * @ORM\Table(name="parent")
- * @ApiResource(shortName="Parent")
  */
 class CParent
 {

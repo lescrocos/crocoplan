@@ -4,17 +4,16 @@
 namespace App\Entity;
 
 
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Core\Annotation\ApiResource;
-use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-use ApiPlatform\Core\Annotation\ApiFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
 
 /**
  * Une garde de parent
@@ -23,6 +22,8 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
  * @ApiResource(
  *     normalizationContext={"groups"={"garde"}},
  *     attributes={"pagination_client_enabled"=true},
+ *     itemOperations={"get"},
+ *     collectionOperations={"get"}
  * )
  * @ApiFilter(SearchFilter::class, properties={"famille": "exact"})
  * @ApiFilter(ExistsFilter::class, properties={"famille"})
@@ -47,7 +48,7 @@ class Garde
      *
      * @ORM\Column(type="time")
      *
-     * @Groups({"garde", "mes_dispos_du_mois"})
+     * @Groups({"garde", "mes_dispos_du_mois", "jour_planning"})
      */
     public $heureArrivee;
 
@@ -56,7 +57,7 @@ class Garde
      *
      * @ORM\Column(type="time")
      *
-     * @Groups({"garde", "mes_dispos_du_mois"})
+     * @Groups({"garde", "mes_dispos_du_mois", "jour_planning"})
      */
     public $heureDepart;
 
@@ -66,7 +67,7 @@ class Garde
      * @ORM\Column(nullable=true)
      * @Assert\NotBlank
      *
-     * @Groups({"garde", "mes_dispos_du_mois"})
+     * @Groups({"garde", "mes_dispos_du_mois", "jour_planning"})
      */
     public $commentaire;
 
@@ -91,6 +92,8 @@ class Garde
      * @var Famille La famille qui est affectée à la garde
      *
      * @ORM\ManyToOne(targetEntity="Famille", inversedBy="gardes")
+     *
+     * @Groups({"jour_planning"})
      */
     public $famille;
 
@@ -99,7 +102,6 @@ class Garde
      *
      * @ORM\ManyToMany(targetEntity="Famille")
      * @ORM\JoinTable(name="garde_famille_disponible")
-     * @ApiSubresource
      */
     public $famillesDisponibles;
 

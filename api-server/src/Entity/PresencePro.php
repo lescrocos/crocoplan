@@ -2,20 +2,17 @@
 
 namespace App\Entity;
 
-use DateTime;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Core\Annotation\ApiResource;
-use Symfony\Component\Validator\Constraints as Assert;
 use App\Enum\AbsenceProType;
+use DateTime;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Représente la présence ou l'absence d'un·e professionnel·le pour un jour de planning donné.
  * @package App\Entity
  * @ORM\Entity
  * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(columns={"jour_planning_id", "pro_id"})})
- * @ApiResource
  */
 class PresencePro
 {
@@ -31,7 +28,9 @@ class PresencePro
     /**
      * @var bool true si la·le pro est présent·e, false sinon
      *
-     * @ORM\Column(nullable=true)
+     * @ORM\Column(nullable=true, type="boolean")
+     *
+     * @Groups({"jour_planning"})
      */
     public $present;
 
@@ -40,6 +39,8 @@ class PresencePro
      *
      * @ORM\Column(nullable=true)
      * @Assert\Choice(callback={AbsenceProType::class, "toArray"})
+     *
+     * @Groups({"jour_planning"})
      */
     public $absenceType;
 
@@ -47,6 +48,8 @@ class PresencePro
      * @var DateTime Heure d'arrivée de la·le pro s'il·elle est présent·e
      *
      * @ORM\Column(type="time", nullable=true)
+     *
+     * @Groups({"jour_planning"})
      */
     public $heureArrivee;
 
@@ -54,6 +57,8 @@ class PresencePro
      * @var DateTime Heure de départ de la·le pro s'il·elle est présent·e
      *
      * @ORM\Column(type="time", nullable=true)
+     *
+     * @Groups({"jour_planning"})
      */
     public $heureDepart;
 
@@ -61,6 +66,8 @@ class PresencePro
      * @var string Commentaire concernant cette présence / absence
      *
      * @ORM\Column(nullable=true)
+     *
+     * @Groups({"jour_planning"})
      */
     public $commentaire;
 
@@ -72,9 +79,9 @@ class PresencePro
     public $version;
 
     /**
-     * @var CoefFamille Le jour de planning de cette présence
+     * @var JourPlanning Le jour de planning de cette présence
      *
-     * @ORM\ManyToOne(targetEntity="JourPlanning", inversedBy="presencesPros")
+     * @ORM\ManyToOne(targetEntity=JourPlanning::class, inversedBy="presencesPros")
      * @ORM\JoinColumn(nullable=false)
      */
     public $jourPlanning;
@@ -82,8 +89,10 @@ class PresencePro
     /**
      * @var Pro Le·la pro concerné·e par cette présence / absence
      *
-     * @ORM\ManyToOne(targetEntity="Pro", inversedBy="presences")
+     * @ORM\ManyToOne(targetEntity=Pro::class, inversedBy="presences")
      * @ORM\JoinColumn(nullable=false)
+     *
+     * @Groups({"jour_planning"})
      */
     public $pro;
 

@@ -70,6 +70,12 @@ const linksData = [
     icon: 'playlist_add_check',
     link: '/mes-dispos'
   },
+  {
+    title: 'Planning',
+    caption: 'Planning hebdo',
+    icon: 'date_range',
+    link: '/planning'
+  },
 ]
 
 import { Vue, Component } from 'vue-property-decorator'

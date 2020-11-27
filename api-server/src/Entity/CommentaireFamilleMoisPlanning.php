@@ -2,10 +2,7 @@
 
 namespace App\Entity;
 
-use DateTime;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Core\Annotation\ApiResource;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -13,7 +10,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @package App\Entity
  * @ORM\Entity
  * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(columns={"mois_planning_id", "famille_id"})})
- * @ApiResource
  */
 class CommentaireFamilleMoisPlanning
 {

@@ -2,18 +2,25 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Core\Annotation\ApiResource;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Un jour de planning
  * @package App\Entity
  * @ORM\Entity
- * @ApiResource
+ * @ApiResource(
+ *     normalizationContext={"groups"={"jour_planning"}},
+ *     itemOperations={"get"},
+ *     collectionOperations={"get"}
+ * )
+ * @ApiFilter(DateFilter::class, properties={"date"})
  */
 class JourPlanning
 {
@@ -23,6 +30,8 @@ class JourPlanning
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *
+     * @Groups({"jour_planning"})
      */
     private $id;
 
@@ -32,7 +41,7 @@ class JourPlanning
      * @ORM\Column(type="date")
      * @Assert\NotNull
      *
-     * @Groups({"garde", "mes_dispos_du_mois"})
+     * @Groups({"jour_planning", "garde", "mes_dispos_du_mois"})
      */
     public $date;
 
@@ -40,6 +49,8 @@ class JourPlanning
      * @var string Commentaire de ce jour de planning
      *
      * @ORM\Column(nullable=true)
+     *
+     * @Groups({"jour_planning"})
      */
     public $commentaire;
 
@@ -55,6 +66,8 @@ class JourPlanning
      * @var PresenceEnfant[] Les présences enfants
      *
      * @ORM\OneToMany(targetEntity="PresenceEnfant", mappedBy="jourPlanning")
+     *
+     * @Groups({"jour_planning"})
      */
     public $presencesEnfants;
 
@@ -62,6 +75,8 @@ class JourPlanning
      * @var PresencePro[] Les présences pros
      *
      * @ORM\OneToMany(targetEntity="PresencePro", mappedBy="jourPlanning")
+     *
+     * @Groups({"jour_planning"})
      */
     public $presencesPros;
 
@@ -69,6 +84,8 @@ class JourPlanning
      * @var Garde[] Les gardes parent
      *
      * @ORM\OneToMany(targetEntity="Garde", mappedBy="jourPlanning")
+     *
+     * @Groups({"jour_planning"})
      */
     public $gardes;
 

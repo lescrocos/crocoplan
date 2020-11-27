@@ -12,7 +12,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Un coefficient de garde famille modifié sur une période donnée
  * @package App\Entity
  * @ORM\Entity
- * @ApiResource
  */
 class CoefGardeFamille
 {

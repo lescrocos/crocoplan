@@ -7,6 +7,11 @@ use App\Entity\Famille;
 use App\Entity\Garde;
 use App\Entity\JourPlanning;
 use App\Entity\MoisPlanning;
+use App\Entity\PresenceEnfant;
+use App\Entity\PresencePro;
+use App\Entity\Pro;
+use App\Enum\AbsenceEnfantType;
+use App\Enum\AbsenceProType;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -21,6 +26,7 @@ class AppFixtures extends Fixture
     private $faker;
 
     const NOMBRE_DE_FAMILLES = 20;
+    const NOMBRE_DE_PROS = 6;
 
 
     public function __construct()
@@ -34,9 +40,9 @@ class AppFixtures extends Fixture
     {
         $faker = $this->faker;
 
+        // Création des familles familles
         $familles = [];
-
-        // Création de 20 familles
+        $enfants = [];
         for ($i = 0; $i < AppFixtures::NOMBRE_DE_FAMILLES; $i++) {
             $famille = new Famille();
             $famille->nom = $faker->firstName();
@@ -63,7 +69,19 @@ class AppFixtures extends Fixture
                 $enfant->famille = $famille;
 
                 $manager->persist($enfant);
+                $enfants[] = $enfant;
             }
+        }
+
+        // Création des pros
+        $pros = [];
+        for ($i = 0; $i < AppFixtures::NOMBRE_DE_PROS; $i++) {
+            $pro = new Pro();
+            $pro->nom = $faker->firstName();
+            $pro->email = $faker->email;
+
+            $manager->persist($pro);
+            $pros[] = $pro;
         }
 
         // Création des mois planning
@@ -83,6 +101,46 @@ class AppFixtures extends Fixture
                     $jourPlanning->moisPlanning = $moisPlanning;
 
                     $manager->persist($jourPlanning);
+
+                    // Ajout des présences des enfants
+                    foreach($enfants as $enfant) {
+                        if ($date->getTimestamp() >= $enfant->dateEntree->getTimestamp()
+                            && $date->getTimestamp() <= $enfant->dateSortie->getTimestamp()) {
+                            $presenceEnfant = new PresenceEnfant();
+                            $presenceEnfant->enfant = $enfant;
+                            $presenceEnfant->jourPlanning = $jourPlanning;
+                            // 99 chances sur 100 d'être présent
+                            $presenceEnfant->present = $this->faker->boolean(99);
+                            if (!$presenceEnfant->present) {
+                                $presenceEnfant->absenceType = $this->getRandomItemOfArray(array_values(AbsenceEnfantType::values()));
+                            }
+                            $manager->persist($presenceEnfant);
+                        }
+                    }
+                    // Ajout des présences des pros
+                    foreach ($pros as $pro) {
+                        $presencePro = new PresencePro();
+                        $presencePro->pro = $pro;
+                        $presencePro->jourPlanning = $jourPlanning;
+                        $presencePro->present = $this->faker->boolean((self::NOMBRE_DE_PROS - 1) * 100 / self::NOMBRE_DE_PROS);
+                        if (!$presencePro->present) {
+                            if ($this->faker->boolean(90)) {
+                                $presencePro->absenceType = AbsenceProType::OFF;
+                            } else {
+                                $presencePro->absenceType = $this->getRandomItemOfArray(array_values(AbsenceProType::values()));
+                            }
+                            if ($this->faker->boolean(10)) {
+                                $presencePro->commentaire = $faker->realText(40);
+                            }
+                        } else {
+                            $presencePro->heureArrivee = new DateTime($this->getRandomItemOfArray(['8:15', '8:30', '9:00', '9:30']));
+                            $presencePro->heureDepart = new DateTime($this->getRandomItemOfArray(['16:30', '17:30', '18:00', '18:30']));
+                            if ($this->faker->boolean(1)) {
+                                $presencePro->commentaire = $faker->realText(40);
+                            }
+                        }
+                        $manager->persist($presencePro);
+                    }
 
                     // Création d'une garde d'ouverture, de 2 du matin et de 2 de l'après-midi
                     $this->creerGarde($jourPlanning, '8:00', '9:30', $familles, $manager);
@@ -107,7 +165,7 @@ class AppFixtures extends Fixture
      */
     public function assigneFamille(Garde $garde, array $familles) {
         if ($this->faker->boolean(90)) { // 9 chances sur 10
-            $garde->famille = $this->getRandomFamille($familles);
+            $garde->famille = $this->getRandomItemOfArray($familles);
         }
     }
 
@@ -121,7 +179,7 @@ class AppFixtures extends Fixture
         $garde->heureDepart = new DateTime($heureDepart);
         // assignation d'une famille aléatoirement
         if ($faker->boolean(90)) {
-            $garde->famille = $familles[rand(0, sizeof($familles) - 1)];
+            $garde->famille = $this->getRandomItemOfArray($familles);
         }
         // commentaire aléatoire
         if ($faker->boolean(10)) { // 1 chances sur 10
@@ -130,17 +188,18 @@ class AppFixtures extends Fixture
         // familles disponibles
         $nbFamillesDisponibles = $faker->biasedNumberBetween(0, AppFixtures::NOMBRE_DE_FAMILLES, function($x) { return 1 - $x; });
         for ($i = 0; $i < $nbFamillesDisponibles; $i++) {
-            $garde->addFamilleDisponible($this->getRandomFamille($familles));
+            $garde->addFamilleDisponible($this->getRandomItemOfArray($familles));
         }
         $manager->persist($garde);
     }
 
     /**
-     * @param Famille[] $familles
-     * @return Famille
+     * @template T
+     * @param T[] $array
+     * @return T
      */
-    private function getRandomFamille(array $familles): Famille
+    private function getRandomItemOfArray(array $array)
     {
-        return $familles[$this->faker->numberBetween(0, sizeof($familles) - 1)];
+        return $array[$this->faker->numberBetween(0, sizeof($array) - 1)];
     }
 }

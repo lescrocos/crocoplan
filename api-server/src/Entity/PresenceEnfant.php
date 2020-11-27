@@ -2,20 +2,17 @@
 
 namespace App\Entity;
 
-use DateTime;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Core\Annotation\ApiResource;
-use Symfony\Component\Validator\Constraints as Assert;
 use App\Enum\AbsenceEnfantType;
+use DateTime;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Représente la présence ou l'absence d'un enfant.
  * @package App\Entity
  * @ORM\Entity
  * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(columns={"jour_planning_id", "enfant_id"})})
- * @ApiResource
  */
 class PresenceEnfant
 {
@@ -31,7 +28,9 @@ class PresenceEnfant
     /**
      * @var bool true si l'enfant est présent, false sinon
      *
-     * @ORM\Column(nullable=true)
+     * @ORM\Column(nullable=true, type="boolean")
+     *
+     * @Groups({"jour_planning"})
      */
     public $present;
 
@@ -72,9 +71,9 @@ class PresenceEnfant
     public $version;
 
     /**
-     * @var CoefFamille Le jour de planning de cette présence
+     * @var JourPlanning Le jour de planning de cette présence
      *
-     * @ORM\ManyToOne(targetEntity="JourPlanning", inversedBy="presencesEnfants")
+     * @ORM\ManyToOne(targetEntity=JourPlanning::class, inversedBy="presencesEnfants")
      * @ORM\JoinColumn(nullable=false)
      */
     public $jourPlanning;
@@ -82,8 +81,10 @@ class PresenceEnfant
     /**
      * @var Enfant L'enfant concerné par cette présence / absence
      *
-     * @ORM\ManyToOne(targetEntity="Enfant", inversedBy="presences")
+     * @ORM\ManyToOne(targetEntity=Enfant::class, inversedBy="presences")
      * @ORM\JoinColumn(nullable=false)
+     *
+     * @Groups({"jour_planning"})
      */
     public $enfant;
 

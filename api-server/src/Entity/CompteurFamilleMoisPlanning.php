@@ -4,15 +4,12 @@ namespace App\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Core\Annotation\ApiResource;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Représente le compteur calculé de garde d'une famille sur un mois de planning
  * @package App\Entity
  * @ORM\Entity
  * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(columns={"mois_planning_id", "famille_id"})})
- * @ApiResource
  */
 class CompteurFamilleMoisPlanning
 {
