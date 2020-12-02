@@ -94,7 +94,7 @@ class AppFixtures extends Fixture
             $manager->persist($moisPlanning);
 
             // Création des jours planning de ce mois
-            foreach(new DatePeriod($moisPlanning->dateDebut, DateInterval::createFromDateString('1 day'), $moisPlanning->dateFin) as $date) {
+            foreach (new DatePeriod($moisPlanning->dateDebut, DateInterval::createFromDateString('1 day'), $moisPlanning->dateFin->setTime(0, 0, 1)) as $date) { // let setTime permet d'inclure la date de fin, merci à https://stackoverflow.com/a/38226650/535203
                 if (($date->format('w') + 6) % 7 < 5) { // le format 'w' renvoit le numéro du jour dans la semaine avec 0 pour dimanche, on décale donc de 6 jours (en modulo 7 = semaine) pour que le samedi et dimanche se retrouve à 5 et 6
                     $jourPlanning = new JourPlanning();
                     $jourPlanning->date = $date;

@@ -89,7 +89,7 @@ class PresencePro
     /**
      * @var Pro Le·la pro concerné·e par cette présence / absence
      *
-     * @ORM\ManyToOne(targetEntity=Pro::class, inversedBy="presences")
+     * @ORM\ManyToOne(targetEntity=Pro::class)
      * @ORM\JoinColumn(nullable=false)
      *
      * @Groups({"jour_planning"})

@@ -1,5 +1,4 @@
-import { httpService } from './http.service'
-import { Famille } from 'src/interfaces/famille'
+import { Famille } from 'src/interfaces/famille';
 import { AbstractService } from 'src/services/abstract.service';
 
 class FamilleService extends AbstractService<Famille> {

@@ -3,5 +3,5 @@ export interface Pro {
   nom: string;
   email?: string;
   presences?: string[];
-  id?: string;
+  id: string;
 }

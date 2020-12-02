@@ -46,19 +46,6 @@ class Pro
      */
     public $email;
 
-    /**
-     * @var PresencePro[] Les présences / absences de ce·tte pro
-     *
-     * @ORM\OneToMany(targetEntity="PresencePro", mappedBy="pro")
-     */
-    public $presences;
-
-
-    public function __construct()
-    {
-        $this->presences = new ArrayCollection();
-    }
-
 
     public function getId(): ?int
     {
