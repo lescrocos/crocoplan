@@ -18,30 +18,57 @@
         <div class="row">
           <div class="col-all" v-for="jourPlanningAffichable in joursPlanningAffichables">
             <q-table
-              :title="jourPlanningAffichable.jourPlanning.date"
+              :title="jourPlanningAffichable.jourDate"
               :data="jourPlanningAffichable.lignes"
-              :columns="[{field: 'nom', label: 'Qui ?'}, {field: 'horaires', label: 'Horaires'}]"
+              :columns="jourColumns"
               :rows-per-page-options="[0]"
               :hide-pagination="true"
               separator="cell"
             >
+              <template v-slot:header="props">
+                <q-tr :props="props">
+                  <q-th>
+                    Qui ?
+                  </q-th>
+                  <q-th>
+                    Commentaire
+                  </q-th>
+                  <q-th v-if="!edit" v-for="titre in horaireTitreColumns" class="titre-horaire-cell" colspan="4">
+                    {{ titre }}
+                  </q-th>
+                  <q-th v-if="edit">
+                    Horaires
+                  </q-th>
+                </q-tr>
+              </template>
               <template v-slot:body="props">
-                <q-tr v-show="props.row.titre" :props="props">
+                <q-tr v-if="props.row.titre" :props="props">
                   <q-td colspan="100%">
                     <div class="text-left">{{ props.row.titre }}</div>
                   </q-td>
                 </q-tr>
-                <q-tr :props="props">
+                <q-tr :props="props" class="ligne-horaire">
                   <q-td auto-width>
                     {{ props.row.nom }}
                   </q-td>
-                  <q-td v-if="props.row.present">
+                  <q-td>
+                    {{ props.row.commentaire }}
+                  </q-td>
+                  <q-td v-if="props.row.present && !edit" v-for="horaireColumn in horaireColumns" :class="computeCellHoraireClass(props.row, horaireColumn)">
+                    <div v-if="Math.abs(horaireColumn.minRangeValue - props.row.horairesRange.min) < stepMinutes" style="position: relative">
+                      <div style="position: absolute; z-index: 1">{{ horaireRangeValueToLabel(props.row.horairesRange.min) }}</div>
+                    </div>
+                    <div v-if="Math.abs(horaireColumn.minRangeValue - props.row.horairesRange.max) < stepMinutes" style="position: relative">
+                      <div style="position: absolute; z-index: 1">{{ horaireRangeValueToLabel(props.row.horairesRange.max) }}</div>
+                    </div>
+                  </q-td>
+                  <q-td v-if="props.row.present && edit">
                     <q-range
                       class="horaire"
                       v-model="props.row.horairesRange"
-                      :min="8 * 60"
-                      :max="19 * 60"
-                      :step="15"
+                      :min="heureDebut * 60"
+                      :max="heureFin * 60"
+                      :step="stepMinutes"
                       :left-label-value="horaireRangeValueToLabel(props.row.horairesRange.min)"
                       :right-label-value="horaireRangeValueToLabel(props.row.horairesRange.max)"
                       :readonly="true"
@@ -51,7 +78,7 @@
                       snap
                     />
                   </q-td>
-                  <q-td v-if="!props.row.present">
+                  <q-td v-if="!props.row.present" colspan="100%">
                     {{ props.row.absenceType }}
                   </q-td>
                 </q-tr>
@@ -69,6 +96,39 @@
   .q-slider__track--h
     margin-top: -5px
     height: 10px
+
+.ligne-horaire
+  .debut-heure
+    border-left 1px solid green
+    border-right none
+
+  .debut-demie-heure
+    border-left 1px dashed green
+    border-right none
+
+  .debut-quart-heure
+    border-left none
+
+  .fin-heure
+    border-left none
+    border-right 1px solid green
+
+  .personne-presente
+    background-color lightgreen
+
+  td
+    height 24px
+
+  .cell-horaire
+    padding-left 5px
+    padding-right 5px
+
+.titre-horaire-cell
+  text-align left
+
+.q-table
+  tbody td
+    height 24px
 </style>
 
 <script lang="ts">
@@ -81,22 +141,54 @@ import { JourPlanning } from 'src/interfaces/jourplanning';
 import { proStore } from 'src/store/pro.store';
 
 interface JourPlanningAffichableLigne {
-  nom: string;
-  present: boolean;
-  heureArrivee?: string;
-  heureDepart?: string;
+  nom?: string
+  present: boolean
+  heureArrivee?: string
+  heureDepart?: string
   horairesRange: {min?: number, max?: number}
-  absenceType?: string;
-  titre?: string;
+  absenceType?: string
+  commentaire?: string
+  titre?: string
+}
+
+interface HoraireColumn {
+  minRangeValue: number
+  maxRangeValue: number
 }
 
 @Component
 export default class Planning extends Vue {
-  currentDate?: Date;
-  currentRange: { from?: string, to?: string } = {};
+  currentDate?: Date
+  currentRange: { from?: string, to?: string } = {}
   titreCalendrier = ''
   joursPlanning: JourPlanning[] = []
-  joursPlanningAffichables: {jourPlanning: JourPlanning, lignes: JourPlanningAffichableLigne[]}[] = []
+  joursPlanningAffichables: {jourPlanning: JourPlanning, lignes: JourPlanningAffichableLigne[], jourDate: string}[] = []
+  edit = false
+  heureDebut = 8
+  heureFin = 19
+  stepMinutes = 15
+  horaireColumns: HoraireColumn[] = []
+  jourColumns: { field:string, label?: string }[] = []
+  horaireTitreColumns: (string|undefined)[] = []
+
+  constructor() {
+    super()
+    // Création des colonnes de la partie horaire d'une ligne
+    for (let i = this.heureDebut * 60; i < this.heureFin * 60; i += this.stepMinutes) {
+      this.horaireColumns.push({minRangeValue: i, maxRangeValue: i + this.stepMinutes})
+    }
+    // Initialisation des colonnes d'un jour
+    this.jourColumns.push({field: 'nom', label: 'Qui ?'})
+    if (this.edit) {
+      this.jourColumns.push({field: 'horaires', label: 'Horaires'})
+    } else {
+      this.horaireColumns.forEach(horaireColumn => {
+        if (horaireColumn.minRangeValue % 60 === 0) {
+          this.horaireTitreColumns.push(this.horaireRangeValueToLabel(horaireColumn.minRangeValue))
+        }
+      })
+    }
+  }
 
   async mounted() {
     await this.initByDate(new Date())
@@ -131,7 +223,7 @@ export default class Planning extends Vue {
       const jourPlanningAffichableLignes: JourPlanningAffichableLigne[] = []
       jourPlanning.presencesPros?.forEach((presencePro, index) => {
         jourPlanningAffichableLignes.push({
-          nom: prosById.get(presencePro.pro.id).nom,
+          nom: prosById.get(presencePro.pro.id)?.nom,
           present: presencePro.present,
           heureArrivee: presencePro.heureArrivee,
           heureDepart: presencePro.heureDepart,
@@ -140,11 +232,13 @@ export default class Planning extends Vue {
             max: this.dateStrToHoraireRangeValue(presencePro.heureDepart)
           },
           absenceType: presencePro.absenceType,
+          commentaire: presencePro.commentaire,
           titre: index == 0 ? 'Horaires pros' : undefined
         })
       })
       return {
         jourPlanning,
+        jourDate: dateUtils.dateToJourComplet(jourPlanning.date),
         lignes: jourPlanningAffichableLignes
       }
     })
@@ -157,6 +251,26 @@ export default class Planning extends Vue {
   dateStrToHoraireRangeValue(dateStr?: string): number | undefined {
     const date = dateStr ? new Date(dateStr) : undefined
     return date ? date.getHours() * 60 + date.getMinutes() : undefined
+  }
+
+  computeCellHoraireClass(jourPlanningAffichableLigne: JourPlanningAffichableLigne, horaireColumn: HoraireColumn): string {
+    const classes: string[] = ['cell-horaire']
+
+    if (horaireColumn.minRangeValue % 60 === 0) {
+      classes.push('debut-heure')
+    } else if (horaireColumn.minRangeValue % 30 === 0) {
+      classes.push('debut-demie-heure')
+    } else if (horaireColumn.minRangeValue % 15 === 0) {
+      classes.push('debut-quart-heure')
+    }
+    if (horaireColumn.maxRangeValue % 60 === 0) {
+      classes.push('fin-heure')
+    }
+    if (jourPlanningAffichableLigne.horairesRange.min <= horaireColumn.minRangeValue && horaireColumn.maxRangeValue <= jourPlanningAffichableLigne.horairesRange.max) {
+      classes.push('personne-presente')
+    }
+
+    return classes.join(' ')
   }
 
 }

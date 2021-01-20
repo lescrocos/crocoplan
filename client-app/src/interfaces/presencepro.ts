@@ -1,6 +1,6 @@
 export interface PresencePro {
   '@id'?: string;
-  present?: string;
+  present: boolean;
   absenceType?: string;
   heureArrivee?: Date;
   heureDepart?: Date;

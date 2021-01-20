@@ -35,7 +35,7 @@ class CompteurFamilleMoisPlanning
     public $compteurForce;
 
     /**
-     * @var CoefFamille le mois planning de ce jour
+     * @var MoisPlanning le mois planning de ce jour
      *
      * @ORM\ManyToOne(targetEntity="MoisPlanning")
      * @ORM\JoinColumn(nullable=false)
