@@ -1,4 +1,5 @@
 import { PresencePro } from 'src/interfaces/presencepro';
+import { Garde } from 'src/interfaces/garde';
 
 export interface JourPlanning {
   '@id'?: string;
@@ -7,6 +8,6 @@ export interface JourPlanning {
   moisPlanning?: string;
   presencesEnfants?: string[];
   presencesPros?: PresencePro[];
-  gardes?: string[];
+  gardes?: Garde[];
   id?: string;
 }

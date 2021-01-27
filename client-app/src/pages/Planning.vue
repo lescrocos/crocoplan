@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <div class="row">
+    <div class="row q-gutter-md">
       <div class="col-all">
         <q-date
           ref="calendrier"
@@ -15,78 +15,77 @@
       </div>
       <div class="col-all">
         <div class="text-h4 q-mb-md">Planning sur la {{titreCalendrier}}</div>
-        <div class="row">
-          <div class="col-all" v-for="jourPlanningAffichable in joursPlanningAffichables">
-            <q-table
-              :title="jourPlanningAffichable.jourDate"
-              :data="jourPlanningAffichable.lignes"
-              :columns="jourColumns"
-              :rows-per-page-options="[0]"
-              :hide-pagination="true"
-              separator="cell"
-            >
-              <template v-slot:header="props">
-                <q-tr :props="props">
-                  <q-th>
-                    Qui ?
-                  </q-th>
-                  <q-th>
-                    Commentaire
-                  </q-th>
-                  <q-th v-if="!edit" v-for="titre in horaireTitreColumns" class="titre-horaire-cell" colspan="4">
-                    {{ titre }}
-                  </q-th>
-                  <q-th v-if="edit">
-                    Horaires
-                  </q-th>
-                </q-tr>
-              </template>
-              <template v-slot:body="props">
-                <q-tr v-if="props.row.titre" :props="props">
-                  <q-td colspan="100%">
-                    <div class="text-left">{{ props.row.titre }}</div>
-                  </q-td>
-                </q-tr>
-                <q-tr :props="props" class="ligne-horaire">
-                  <q-td auto-width>
-                    {{ props.row.nom }}
-                  </q-td>
-                  <q-td>
-                    {{ props.row.commentaire }}
-                  </q-td>
-                  <q-td v-if="props.row.present && !edit" v-for="horaireColumn in horaireColumns" :class="computeCellHoraireClass(props.row, horaireColumn)">
-                    <div v-if="Math.abs(horaireColumn.minRangeValue - props.row.horairesRange.min) < stepMinutes" style="position: relative">
-                      <div style="position: absolute; z-index: 1">{{ horaireRangeValueToLabel(props.row.horairesRange.min) }}</div>
+      </div>
+      <q-card v-for="jourPlanningAffichable in joursPlanningAffichables" class="col-all row">
+        <q-card-section class="col-all">
+          <div class="text-h5 q-mb-md">{{ jourPlanningAffichable.jourDate }}</div>
+        </q-card-section>
+        <q-separator inset />
+        <q-card-section horizontal class="col-all row">
+          <q-markup-table class="col-all table-horaire">
+            <thead>
+              <tr>
+                <th>
+                  Qui ?
+                </th>
+                <th>
+                  Commentaire
+                </th>
+                <th v-if="!edit" v-for="titre in horaireTitreColumns" class="titre-horaire-cell" colspan="4">
+                  {{ titre }}
+                </th>
+                <th v-if="edit">
+                  Horaires
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="ligne in jourPlanningAffichable.lignes">
+                <tr v-if="ligne.titre" class="titre-ligne-horaire">
+                  <td colspan="100%">
+                    <div class="text-left">{{ ligne.titre }}</div>
+                  </td>
+                </tr>
+                <tr class="ligne-horaire">
+                  <td>
+                    {{ ligne.nom }}&nbsp;
+                  </td>
+                  <td>
+                    {{ ligne.commentaire }}
+                  </td>
+                  <td v-if="ligne.present && !edit" v-for="horaireColumn in horaireColumns" :class="computeCellHoraireClass(ligne, horaireColumn)">
+                    <div v-if="Math.abs(horaireColumn.minRangeValue - ligne.horairesRange.min) < stepMinutes" class="cell-horaire-display-container">
+                      <div class="cell-horaire-display">{{ horaireRangeValueToLabel(ligne.horairesRange.min) }}</div>
                     </div>
-                    <div v-if="Math.abs(horaireColumn.minRangeValue - props.row.horairesRange.max) < stepMinutes" style="position: relative">
-                      <div style="position: absolute; z-index: 1">{{ horaireRangeValueToLabel(props.row.horairesRange.max) }}</div>
+                    <div v-if="Math.abs(horaireColumn.minRangeValue - ligne.horairesRange.max + 3 * stepMinutes) < stepMinutes" class="cell-horaire-display-container">
+                      <div class="cell-horaire-display">{{ horaireRangeValueToLabel(ligne.horairesRange.max) }}</div>
                     </div>
-                  </q-td>
-                  <q-td v-if="props.row.present && edit">
+                  </td>
+                  <td v-if="ligne.present && edit">
                     <q-range
                       class="horaire"
-                      v-model="props.row.horairesRange"
+                      v-model="ligne.horairesRange"
                       :min="heureDebut * 60"
                       :max="heureFin * 60"
                       :step="stepMinutes"
-                      :left-label-value="horaireRangeValueToLabel(props.row.horairesRange.min)"
-                      :right-label-value="horaireRangeValueToLabel(props.row.horairesRange.max)"
+                      :left-label-value="horaireRangeValueToLabel(ligne.horairesRange.min)"
+                      :right-label-value="horaireRangeValueToLabel(ligne.horairesRange.max)"
                       :readonly="true"
                       markers
                       label-always
                       drag-range
                       snap
                     />
-                  </q-td>
-                  <q-td v-if="!props.row.present" colspan="100%">
-                    {{ props.row.absenceType }}
-                  </q-td>
-                </q-tr>
+                  </td>
+                  <td v-if="!ligne.present" colspan="100%">
+                    {{ ligne.absenceType }}
+                  </td>
+                </tr>
               </template>
-            </q-table>
-          </div>
-        </div>
-      </div>
+            </tbody>
+          </q-markup-table>
+        </q-card-section>
+      </q-card>
     </div>
   </q-page>
 </template>
@@ -116,19 +115,29 @@
   .personne-presente
     background-color lightgreen
 
-  td
-    height 24px
-
   .cell-horaire
     padding-left 5px
     padding-right 5px
 
+  .cell-horaire-display-container
+    position relative
+
+  .cell-horaire-display
+    position absolute
+    z-index 1
+    font-weight bold
+
 .titre-horaire-cell
   text-align left
 
-.q-table
-  tbody td
+.titre-ligne-horaire
+  background-color $primary
+
+.table-horaire table
+  thead,tbody,td,tr
+    line-height normal
     height 24px
+
 </style>
 
 <script lang="ts">
@@ -139,6 +148,7 @@ import { dateUtils } from 'src/utils/date.utils';
 import { jourPlanningService } from 'src/services/jour-planning.service';
 import { JourPlanning } from 'src/interfaces/jourplanning';
 import { proStore } from 'src/store/pro.store';
+import { familleStore } from 'src/store/famille.store';
 
 interface JourPlanningAffichableLigne {
   nom?: string
@@ -219,7 +229,7 @@ export default class Planning extends Vue {
     this.titreCalendrier = `Semaine du ${startOfWeekDate.getDate()} ${date.formatDate(startOfWeekDate, 'MMMM')}`
     this.joursPlanning = await jourPlanningService.findAllByDateBetween(startOfWeekDate, endOfWeekDate)
     const prosById = await proStore.getProsById()
-    this.joursPlanningAffichables = this.joursPlanning.map(jourPlanning => {
+    for (const jourPlanning of this.joursPlanning) {
       const jourPlanningAffichableLignes: JourPlanningAffichableLigne[] = []
       jourPlanning.presencesPros?.forEach((presencePro, index) => {
         jourPlanningAffichableLignes.push({
@@ -236,12 +246,46 @@ export default class Planning extends Vue {
           titre: index == 0 ? 'Horaires pros' : undefined
         })
       })
-      return {
+
+      // Ajout des gardes
+      const gardesLignes: JourPlanningAffichableLigne[] = []
+      const appelsAGardesLignes: JourPlanningAffichableLigne[] = []
+      for (const garde of jourPlanning.gardes) {
+        const ligne = {
+          present: true,
+          heureArrivee: garde.heureArrivee,
+          heureDepart: garde.heureDepart,
+          horairesRange: {
+            min: this.dateStrToHoraireRangeValue(garde.heureArrivee),
+            max: this.dateStrToHoraireRangeValue(garde.heureDepart)
+          },
+          commentaire: garde.commentaire
+        }
+        if (garde.famille) {
+          // La garde est pourvue
+          gardesLignes.push({
+            nom: (await familleStore.getFamilleById(garde.famille.id))?.nom,
+            titre: gardesLignes.length == 0 ? 'Gardes' : undefined,
+            ...ligne
+          })
+        } else {
+          // La garde est à pourvoir
+          appelsAGardesLignes.push({
+            nom: '',
+            titre: appelsAGardesLignes.length == 0 ? 'Appels à garde' : undefined,
+            ...ligne
+          })
+        }
+      }
+      jourPlanningAffichableLignes.push(...gardesLignes)
+      jourPlanningAffichableLignes.push(...appelsAGardesLignes)
+
+      this.joursPlanningAffichables.push({
         jourPlanning,
         jourDate: dateUtils.dateToJourComplet(jourPlanning.date),
         lignes: jourPlanningAffichableLignes
-      }
-    })
+      })
+    }
   }
 
   horaireRangeValueToLabel(horaireRange?: number): string | undefined {

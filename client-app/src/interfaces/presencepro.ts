@@ -1,12 +1,14 @@
+import { Pro } from 'src/interfaces/pro';
+
 export interface PresencePro {
   '@id'?: string;
   present: boolean;
   absenceType?: string;
-  heureArrivee?: Date;
-  heureDepart?: Date;
+  heureArrivee?: string;
+  heureDepart?: string;
   commentaire?: string;
-  version?: Date;
+  version?: string;
   jourPlanning?: string;
-  pro?: string;
+  pro?: string | Pro;
   id?: string;
 }
