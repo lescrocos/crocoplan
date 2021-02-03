@@ -14,8 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @package App\Entity
  * @ORM\Entity
  * @ApiResource(
- *     itemOperations={"get"},
- *     collectionOperations={"get"}
+ *     collectionOperations={"get" = {"normalization_context" = {"groups" = "enfant"}}}
  * )
  */
 class Enfant
@@ -27,7 +26,7 @@ class Enfant
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      *
-     * @Groups({"jour_planning"})
+     * @Groups({"jour_planning", "enfant"})
      */
     private $id;
 
@@ -36,6 +35,8 @@ class Enfant
      *
      * @ORM\Column
      * @Assert\NotBlank
+     *
+     * @Groups({"enfant"})
      */
     public $nom;
 
@@ -44,6 +45,8 @@ class Enfant
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull
+     *
+     * @Groups({"enfant"})
      */
     public $dateEntree;
 
@@ -52,6 +55,8 @@ class Enfant
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull
+     *
+     * @Groups({"enfant"})
      */
     public $dateSortie;
 
@@ -59,6 +64,8 @@ class Enfant
      * @var DateTime La date de début d'adaptation de cet enfant
      *
      * @ORM\Column(type="date", nullable=true)
+     *
+     * @Groups({"enfant"})
      */
     public $debutAdaptation;
 
@@ -66,6 +73,8 @@ class Enfant
      * @var DateTime La date de fin d'adaptation de cet enfant
      *
      * @ORM\Column(type="date", nullable=true)
+     *
+     * @Groups({"enfant"})
      */
     public $finAdaptation;
 
@@ -78,16 +87,18 @@ class Enfant
     public $famille;
 
     /**
-     * @var PresenceEnfant[] Les présences / absences de cet enfant
+     * @var EnfantGroupeEnfant[] Les association à des groupes d'enfants de cet enfant
      *
-     * @ORM\OneToMany(targetEntity="PresenceEnfant", mappedBy="enfant")
+     * @ORM\OneToMany(targetEntity=EnfantGroupeEnfant::class, mappedBy="enfant")
+     *
+     * @Groups({"enfant"})
      */
-    public $presences;
+    public $groupes;
 
 
     public function __construct()
     {
-        $this->presences = new ArrayCollection();
+        $this->groupes = new ArrayCollection();
     }
 
 

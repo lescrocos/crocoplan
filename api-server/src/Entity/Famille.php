@@ -69,19 +69,11 @@ class Famille
      */
     public $parents;
 
-    /**
-     * @var Garde[] Les gardes affectées à cette famille
-     *
-     * @ORM\OneToMany(targetEntity="Garde", mappedBy="famille")
-     */
-    public $gardes;
-
 
     public function __construct()
     {
         $this->enfants = new ArrayCollection();
         $this->parents = new ArrayCollection();
-        $this->gardes = new ArrayCollection();
     }
 
 

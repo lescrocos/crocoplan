@@ -1,25 +1,32 @@
 version: '3.4'
 
 services:
-  crocoplan-api_server-dev:
-    container_name: crocoplan-api_server-dev
+  api_server:
     image: crocoplan-api_server-dev
     build:
       context: ../api-server
       target: common-stage
     ports:
       - "8000:8000"
-    command: bash -x -c 'while ! nc -vz crocoplan-db_dev 3306; do sleep 1; done && composer install && php bin/console doctrine:schema:update --force && symfony server:start --no-tls'
+    command: >
+      bash -x -c 'while ! nc -vz db 3306; do sleep 1; done
+      && composer install
+      && php bin/console doctrine:database:drop --force
+      && php bin/console doctrine:database:create
+      && php bin/console doctrine:schema:update --force
+      && php bin/console doctrine:fixtures:load --append --no-interaction
+      && symfony server:start --no-tls'
+#    dns_search: ''
     volumes:
       - ../api-server:/api-server
       - ./data/.symfony:/.symfony
       - ./data/.composer:/.composer
-    user: ${CURRENT_USER:?"Lancez cette commande 'CURRENT_USER=$(id -u):$(id -g) docker-compose -f docker/docker-compose-dev.yml up'"}
+    user: ${CURRENT_USER:?"Lancez cette commande 'CURRENT_USER=$(id -u):$(id -g) docker-compose -p crocoplan-dev -f docker/docker-compose-dev.yml up'"}
     networks:
-      crocoplan-dev:
+      api_server:
+      db:
 
-  crocoplan-db_dev:
-    container_name: crocoplan-db_dev
+  db:
     image: mysql:5.6 # mysql:5.6.49
     environment:
       - MYSQL_ROOT_PASSWORD=crocoplan
@@ -29,10 +36,9 @@ services:
     ports:
       - "3306:3306"
     networks:
-      crocoplan-dev:
+      db:
 
-  crocoplan-client_app-dev:
-    container_name: crocoplan-client_app-dev
+  client_app:
     image: crocoplan-client_app-dev
     build:
       context: ../client-app
@@ -51,8 +57,8 @@ services:
       - ./data/.npm:/.npm
     user: ${CURRENT_USER:?"Lancez cette commande 'CURRENT_USER=$(id -u):$(id -g) docker-compose -f docker/docker-compose-dev.yml up'"}
     networks:
-      crocoplan-dev:
+      api_server:
 
 networks:
-  crocoplan-dev:
-
+  api_server:
+  db:

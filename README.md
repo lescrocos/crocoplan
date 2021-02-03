@@ -11,12 +11,12 @@ mkdir -p ./docker/data/{.symfony,.composer,.config,.quasar-starter-kits,.yarn,.c
 
 Et enfin lancer le projet de cette manière :
 ```bash
-CURRENT_USER=$(id -u):$(id -g) docker-compose -f docker/docker-compose-dev.yml up
+COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 CURRENT_USER=$(id -u):$(id -g) docker-compose -p crocoplan-dev -f docker/docker-compose-dev.yml up
 ```
 
 Pour supprimer les données de la base et la ré-initialiser :
 ```bash
-CURRENT_USER=$(id -u):$(id -g) docker-compose -f docker/docker-compose-dev.yml down --volumes
+CURRENT_USER=$(id -u):$(id -g) docker-compose -p crocoplan-dev -f docker/docker-compose-dev.yml down --volumes
 ```
 
 ## Initialisation d'une fausse base de donnée côtée serveur

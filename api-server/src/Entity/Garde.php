@@ -91,7 +91,7 @@ class Garde
     /**
      * @var Famille La famille qui est affectée à la garde
      *
-     * @ORM\ManyToOne(targetEntity="Famille", inversedBy="gardes")
+     * @ORM\ManyToOne(targetEntity=Famille::class)
      *
      * @Groups({"jour_planning"})
      */

@@ -16,13 +16,13 @@
       <div class="col-all">
         <div class="text-h4 q-mb-md">Planning sur la {{titreCalendrier}}</div>
       </div>
-      <q-card v-for="jourPlanningAffichable in joursPlanningAffichables" class="col-all row">
-        <q-card-section class="col-all">
+      <q-card v-for="jourPlanningAffichable in joursPlanningAffichables" class="col-all">
+        <q-card-section class="">
           <div class="text-h5 q-mb-md">{{ jourPlanningAffichable.jourDate }}</div>
         </q-card-section>
-        <q-separator inset />
-        <q-card-section horizontal class="col-all row">
-          <q-markup-table class="col-all table-horaire">
+        <q-separator inset="true" />
+        <q-card-section horizontal class="row">
+          <q-markup-table class="table-horaire col-9">
             <thead>
               <tr>
                 <th>
@@ -84,6 +84,28 @@
               </template>
             </tbody>
           </q-markup-table>
+          <q-card-section class="col-3">
+            <q-card-section>
+              <div class="text-h6 q-mb-md">Notes</div>
+              <div class="text-subtitle1">{{ jourPlanningAffichable.jourPlanning.commentaire }}</div>
+            </q-card-section>
+            <q-card-section>
+              <div class="text-h6 q-mb-md">Présences ({{ jourPlanningAffichable.presences.enfants.size }})</div>
+              <ul>
+                <li v-for="nomGroupe in Object.keys(jourPlanningAffichable.presences.parGroupes)">
+                  <span class="text-bold">{{ nomGroupe }} ({{ jourPlanningAffichable.presences.parGroupes[nomGroupe].size }})</span> : {{ Array.from(jourPlanningAffichable.presences.parGroupes[nomGroupe]).map(enfant => enfant.nom).sort().join(', ') }}
+                </li>
+              </ul>
+            </q-card-section>
+            <q-card-section>
+              <div class="text-h6 q-mb-md">Absences ({{ jourPlanningAffichable.absences.enfants.size }})</div>
+              <ul>
+                <li v-for="nomGroupe in Object.keys(jourPlanningAffichable.absences.parGroupes)">
+                  <span class="text-bold">{{ nomGroupe }} ({{ jourPlanningAffichable.absences.parGroupes[nomGroupe].size }})</span> : {{ Array.from(jourPlanningAffichable.absences.parGroupes[nomGroupe]).map(enfant => enfant.nom).join(', ') }}
+                </li>
+              </ul>
+            </q-card-section>
+          </q-card-section>
         </q-card-section>
       </q-card>
     </div>
@@ -149,6 +171,8 @@ import { jourPlanningService } from 'src/services/jour-planning.service';
 import { JourPlanning } from 'src/interfaces/jourplanning';
 import { proStore } from 'src/store/pro.store';
 import { familleStore } from 'src/store/famille.store';
+import { Enfant } from 'src/interfaces/enfant';
+import { enfantStore } from 'src/store/enfant.store';
 
 interface JourPlanningAffichableLigne {
   nom?: string
@@ -166,19 +190,23 @@ interface HoraireColumn {
   maxRangeValue: number
 }
 
+class PresencesAbsences {
+  parGroupes: {[nomGroupe: string]: Set<Enfant>} = {}
+  enfants: Set<Enfant> = new Set<Enfant>()
+}
+
 @Component
 export default class Planning extends Vue {
   currentDate?: Date
   currentRange: { from?: string, to?: string } = {}
   titreCalendrier = ''
   joursPlanning: JourPlanning[] = []
-  joursPlanningAffichables: {jourPlanning: JourPlanning, lignes: JourPlanningAffichableLigne[], jourDate: string}[] = []
+  joursPlanningAffichables: {jourPlanning: JourPlanning, lignes: JourPlanningAffichableLigne[], jourDate: string, presences: PresencesAbsences, absences: PresencesAbsences}[] = []
   edit = false
   heureDebut = 8
   heureFin = 19
   stepMinutes = 15
   horaireColumns: HoraireColumn[] = []
-  jourColumns: { field:string, label?: string }[] = []
   horaireTitreColumns: (string|undefined)[] = []
 
   constructor() {
@@ -188,16 +216,11 @@ export default class Planning extends Vue {
       this.horaireColumns.push({minRangeValue: i, maxRangeValue: i + this.stepMinutes})
     }
     // Initialisation des colonnes d'un jour
-    this.jourColumns.push({field: 'nom', label: 'Qui ?'})
-    if (this.edit) {
-      this.jourColumns.push({field: 'horaires', label: 'Horaires'})
-    } else {
-      this.horaireColumns.forEach(horaireColumn => {
-        if (horaireColumn.minRangeValue % 60 === 0) {
-          this.horaireTitreColumns.push(this.horaireRangeValueToLabel(horaireColumn.minRangeValue))
-        }
-      })
-    }
+    this.horaireColumns.forEach(horaireColumn => {
+      if (horaireColumn.minRangeValue % 60 === 0) {
+        this.horaireTitreColumns.push(this.horaireRangeValueToLabel(horaireColumn.minRangeValue))
+      }
+    })
   }
 
   async mounted() {
@@ -228,7 +251,7 @@ export default class Planning extends Vue {
     this.$refs.calendrier.$data.editRange = void 0;
     this.titreCalendrier = `Semaine du ${startOfWeekDate.getDate()} ${date.formatDate(startOfWeekDate, 'MMMM')}`
     this.joursPlanning = await jourPlanningService.findAllByDateBetween(startOfWeekDate, endOfWeekDate)
-    const prosById = await proStore.getProsById()
+    const prosById = await proStore.getAllById()
     for (const jourPlanning of this.joursPlanning) {
       const jourPlanningAffichableLignes: JourPlanningAffichableLigne[] = []
       jourPlanning.presencesPros?.forEach((presencePro, index) => {
@@ -280,12 +303,47 @@ export default class Planning extends Vue {
       jourPlanningAffichableLignes.push(...gardesLignes)
       jourPlanningAffichableLignes.push(...appelsAGardesLignes)
 
+      // Ajout des présences et absences
+      const presences = new PresencesAbsences()
+      const absences = new PresencesAbsences()
+
+      if (jourPlanning.presencesEnfants) {
+        for (const presenceEnfant of jourPlanning.presencesEnfants) {
+          const presenceAbsence = presenceEnfant.present ? presences : absences
+          const enfant = await enfantStore.getById(presenceEnfant.enfant.id as string) as Enfant
+          presenceAbsence.enfants.add(enfant)
+          // Ajout des groupes
+          let groupeTrouve = false
+          for (const enfantGroupeEnfant of enfant.groupes) {
+            if (date.isBetweenDates(new Date(jourPlanning.date), new Date(enfantGroupeEnfant.dateDebut as string), new Date(enfantGroupeEnfant.dateFin as string))) {
+              // la date de ce jour est incluse entre les bornes de déclaration de l'association de l'enfant à ce groupe, on peut le rajouter
+              const groupeNom = enfantGroupeEnfant.groupe?.nom
+              if (groupeNom) {
+                this.addEnfantToGroupe(presenceAbsence, groupeNom, enfant)
+                groupeTrouve = true
+              }
+            }
+          }
+          if (!groupeTrouve) {
+            // Si l'enfant ne correspond à aucun groupe, on l'ajoute à "Autres"
+            this.addEnfantToGroupe(presenceAbsence, 'Autres', enfant)
+          }
+        }
+      }
+
       this.joursPlanningAffichables.push({
         jourPlanning,
         jourDate: dateUtils.dateToJourComplet(jourPlanning.date),
-        lignes: jourPlanningAffichableLignes
+        lignes: jourPlanningAffichableLignes,
+        presences: presences,
+        absences: absences
       })
     }
+  }
+
+  private addEnfantToGroupe(presenceAbsence: PresencesAbsences, groupeNom: string, enfant: Enfant) {
+    const parGroupe = presenceAbsence.parGroupes[groupeNom] = presenceAbsence.parGroupes[groupeNom] || new Set<Enfant>();
+    parGroupe.add(enfant);
   }
 
   horaireRangeValueToLabel(horaireRange?: number): string | undefined {

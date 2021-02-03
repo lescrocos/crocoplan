@@ -88,7 +88,7 @@ module.exports = configure(function (ctx) {
       port: 8080,
       open: true, // opens browser window automatically
       proxy: {
-        '/api': 'http://crocoplan-api_server-dev:8000'
+        '/api': 'http://api_server:8000'
       }
     },
 

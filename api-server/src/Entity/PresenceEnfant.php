@@ -81,7 +81,7 @@ class PresenceEnfant
     /**
      * @var Enfant L'enfant concerné par cette présence / absence
      *
-     * @ORM\ManyToOne(targetEntity=Enfant::class, inversedBy="presences")
+     * @ORM\ManyToOne(targetEntity=Enfant::class)
      * @ORM\JoinColumn(nullable=false)
      *
      * @Groups({"jour_planning"})
