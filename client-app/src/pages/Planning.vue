@@ -251,6 +251,7 @@ export default class Planning extends Vue {
     this.$refs.calendrier.$data.editRange = void 0;
     this.titreCalendrier = `Semaine du ${startOfWeekDate.getDate()} ${date.formatDate(startOfWeekDate, 'MMMM')}`
     this.joursPlanning = await jourPlanningService.findAllByDateBetween(startOfWeekDate, endOfWeekDate)
+    this.joursPlanningAffichables = []
     const prosById = await proStore.getAllById()
     for (const jourPlanning of this.joursPlanning) {
       const jourPlanningAffichableLignes: JourPlanningAffichableLigne[] = []

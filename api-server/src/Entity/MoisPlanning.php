@@ -3,16 +3,31 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiProperty;
+use ApiPlatform\Core\Annotation\ApiResource;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Action\NotFoundAction;
+use App\Controller\MoisPlanningController;
 
 /**
  * Un mois de planning
  * @package App\Entity
  * @ORM\Entity
+ * @ApiResource(
+ *     itemOperations={
+ *         "get"={"controller"=NotFoundAction::class, "read"=false, "output"=false},
+ *         "recalculer_compteurs_familles"={
+ *             "path"="/mois-plannings/{id}/recalculer-compteurs-familles",
+ *             "controller"="App\Controller\MoisPlanningController::recalculerCompteursFamilles",
+ *             "method"="get",
+ *             "normalization_context"={"groups"="recalculer_compteurs_familles"}
+ *         }
+ *     },
+ *     collectionOperations={"get"={"controller"=NotFoundAction::class, "read"=false, "output"=false}}
+ * )
  */
 class MoisPlanning
 {
@@ -58,7 +73,7 @@ class MoisPlanning
     public $dateFin;
 
     /**
-     * @var string Commentaire de ce mois de planning
+     * @var ?string Commentaire de ce mois de planning
      *
      * @ORM\Column(nullable=true)
      *
@@ -69,14 +84,24 @@ class MoisPlanning
     /**
      * @var JourPlanning[] Les jours planning de ce mois
      *
-     * @ORM\OneToMany(targetEntity="JourPlanning", mappedBy="moisPlanning")
+     * @ORM\OneToMany(targetEntity=JourPlanning::class, mappedBy="moisPlanning")
      */
     public $joursPlanning;
+
+    /**
+     * @var CompteurFamilleMoisPlanning[] Les compteurs des familles de ce mois
+     *
+     * @ORM\OneToMany(targetEntity=CompteurFamilleMoisPlanning::class, mappedBy="moisPlanning")
+     *
+     * @Groups({"recalculer_compteurs_familles"})
+     */
+    public $compteursFamilles;
 
 
     public function __construct()
     {
         $this->joursPlanning = new ArrayCollection();
+        $this->compteursFamilles = new ArrayCollection();
     }
 
 

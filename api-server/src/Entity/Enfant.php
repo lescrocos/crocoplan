@@ -41,27 +41,7 @@ class Enfant
     public $nom;
 
     /**
-     * @var DateTime La date d'entrée de l'enfant à la crèche
-     *
-     * @ORM\Column(type="date")
-     * @Assert\NotNull
-     *
-     * @Groups({"enfant"})
-     */
-    public $dateEntree;
-
-    /**
-     * @var DateTime La date de sortie de l'enfant de la crèche
-     *
-     * @ORM\Column(type="date")
-     * @Assert\NotNull
-     *
-     * @Groups({"enfant"})
-     */
-    public $dateSortie;
-
-    /**
-     * @var DateTime La date de début d'adaptation de cet enfant
+     * @var DateTime|null La date de début d'adaptation de cet enfant
      *
      * @ORM\Column(type="date", nullable=true)
      *
@@ -70,7 +50,7 @@ class Enfant
     public $debutAdaptation;
 
     /**
-     * @var DateTime La date de fin d'adaptation de cet enfant
+     * @var DateTime|null La date de fin d'adaptation de cet enfant
      *
      * @ORM\Column(type="date", nullable=true)
      *

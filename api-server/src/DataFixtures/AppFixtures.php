@@ -78,21 +78,21 @@ class AppFixtures extends Fixture
                 $enfant = new Enfant();
                 if ($j == 0) {
                     // Premier enfant
-                    $enfant->dateEntree = $famille->dateEntree;
-                    $enfant->dateSortie = $famille->dateSortie;
+                    $dateEntree = $famille->dateEntree;
+                    $dateSortie = $famille->dateSortie;
                     $enfant->nom = $famille->nom;
                 } else {
                     // Tous les autres enfants
-                    $enfant->dateEntree = $faker->dateTimeBetween($famille->dateEntree, 'now');
-                    $enfant->dateSortie = $faker->dateTimeBetween('now', $famille->dateSortie);
+                    $dateEntree = $faker->dateTimeBetween($famille->dateEntree, 'now');
+                    $dateSortie = $faker->dateTimeBetween('now', $famille->dateSortie);
                     $enfant->nom = $faker->firstName();
                 }
                 $enfant->famille = $famille;
                 $enfantGroupeEnfant = new EnfantGroupeEnfant();
                 $enfantGroupeEnfant->enfant = $enfant;
                 $enfantGroupeEnfant->groupe = $groupesEnfants[floor(sizeof($enfants) * AppFixtures::NOMBRE_DE_GROUPES_D_ENFANTS / AppFixtures::NOMBRE_D_ENFANTS)];
-                $enfantGroupeEnfant->dateDebut = $enfant->dateEntree;
-                $enfantGroupeEnfant->dateFin = $enfant->dateSortie;
+                $enfantGroupeEnfant->dateDebut = $dateEntree;
+                $enfantGroupeEnfant->dateFin = $dateSortie;
                 $manager->persist($enfantGroupeEnfant);
                 $enfant->groupes[] = $enfantGroupeEnfant;
 
@@ -135,8 +135,9 @@ class AppFixtures extends Fixture
 
                     // Ajout des présences des enfants
                     foreach($enfants as $enfant) {
-                        if ($date->getTimestamp() >= $enfant->dateEntree->getTimestamp()
-                            && $date->getTimestamp() <= $enfant->dateSortie->getTimestamp()) {
+                        $groupe = $enfant->groupes[0];
+                        if ($date->getTimestamp() >= $groupe->dateDebut->getTimestamp()
+                            && $date->getTimestamp() <= $groupe->dateFin->getTimestamp()) {
                             $presenceEnfant = new PresenceEnfant();
                             $presenceEnfant->enfant = $enfant;
                             $presenceEnfant->jourPlanning = $jourPlanning;

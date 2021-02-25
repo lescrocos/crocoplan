@@ -23,21 +23,33 @@ class CompteurFamilleMoisPlanning
     private $id;
 
     /**
-     * @var integer Compteur calculé (en nombres de secondes) de gardes restant à réaliser (si négatif) ou "stocké" (si positif) à la fin de ce mois de planning
-     * @ORM\Column
+     * @var integer Compteur calculé (en nombre de secondes) de gardes restant à réaliser (si négatif) ou "stocké" (si positif) à la fin de ce mois de planning
+     * @ORM\Column(type="integer")
      */
     public $compteur;
 
     /**
-     * @var integer Compteur forcé (en nombres de secondes) de gardes restant à réaliser (si négatif) ou "stocké" (si positif) à la fin de ce mois de planning. Prend dans ce cas le pas sur le compteur calculé lors du mois suivant.
-     * @ORM\Column
+     * @var integer|null Compteur forcé (en nombre de secondes) de gardes restant à réaliser (si négatif) ou "stocké" (si positif) à la fin de ce mois de planning. Prend dans ce cas le pas sur le compteur calculé lors du mois suivant.
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $compteurForce;
 
     /**
+     * @var integer Quota de jours d'absence (en nombre de jour) restant à la fin de ce mois de planning.
+     * @ORM\Column(type="integer")
+     */
+    public $quotaJoursAbsence;
+
+    /**
+     * @var integer|null Quota de jours d'absence forcé (en nombre de jour) restant à la fin de ce mois de planning. Prend dans ce cas le pas sur le quota de jours d'absence lors du mois suivant.
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    public $quotaJoursAbsenceForce;
+
+    /**
      * @var MoisPlanning le mois planning de ce jour
      *
-     * @ORM\ManyToOne(targetEntity="MoisPlanning")
+     * @ORM\ManyToOne(targetEntity=MoisPlanning::class)
      * @ORM\JoinColumn(nullable=false)
      */
     public $moisPlanning;

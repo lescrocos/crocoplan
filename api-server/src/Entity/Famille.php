@@ -40,7 +40,7 @@ class Famille
     public $nom;
 
     /**
-     * @var DateTime La date d'entrée de la famille à la crèche
+     * @var DateTime La date d'entrée de la famille à la crèche (premier jour effectif à la crèche)
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull
@@ -48,7 +48,7 @@ class Famille
     public $dateEntree;
 
     /**
-     * @var DateTime La date de sortie de la famille de la crèche
+     * @var DateTime La date de sortie de la famille de la crèche (dernier jour effectif à la crèche)
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull

@@ -5,18 +5,29 @@ services:
     image: crocoplan-api_server-dev
     build:
       context: ../api-server
-      target: common-stage
+      target: dev-stage
     ports:
       - "8000:8000"
     command: >
       bash -x -c 'while ! nc -vz db 3306; do sleep 1; done
-      && composer install
-      && php bin/console doctrine:database:drop --force
-      && php bin/console doctrine:database:create
-      && php bin/console doctrine:schema:update --force
-      && php bin/console doctrine:fixtures:load --append --no-interaction
+      && XDEBUG_MODE=off composer install
+      && XDEBUG_MODE=off php bin/console doctrine:database:drop --force
+      && XDEBUG_MODE=off php bin/console doctrine:database:create
+      && XDEBUG_MODE=off php bin/console doctrine:schema:update --force
+      && XDEBUG_MODE=off php bin/console doctrine:fixtures:load --append --no-interaction
       && symfony server:start --no-tls'
-#    dns_search: ''
+    environment:
+      HOME: /tmp
+      # See https://docs.docker.com/docker-for-mac/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
+      # See https://github.com/docker/for-linux/issues/264
+      XDEBUG_CONFIG: >-
+        client_host=host.docker.internal
+        client_port=9003
+        idekey=PHPSTORM
+      # This should correspond to the server declared in PHPStorm `Preferences | Languages & Frameworks | PHP | Servers`
+      # Then PHPStorm will use the corresponding path mappings
+      PHP_IDE_CONFIG: serverName=api-server
+      XDEBUG_MODE: develop,coverage,debug,gcstats,profile,trace
     volumes:
       - ../api-server:/api-server
       - ./data/.symfony:/.symfony
@@ -25,6 +36,8 @@ services:
     networks:
       api_server:
       db:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   db:
     image: mysql:5.6 # mysql:5.6.49
