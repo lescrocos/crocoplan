@@ -55,9 +55,18 @@ class JourPlanning
     public $commentaire;
 
     /**
+     * @var bool Indique si la crèche est ouverte pour les enfants ce jour là
+
+     * @ORM\Column(options={"default": true})
+     *
+     * @Groups({"jour_planning"})
+     */
+    public $crecheOuvertePourEnfants = true;
+
+    /**
      * @var MoisPlanning le mois planning de ce jour
      *
-     * @ORM\ManyToOne(targetEntity="MoisPlanning", inversedBy="joursPlanning")
+     * @ORM\ManyToOne(targetEntity=MoisPlanning::class, inversedBy="joursPlanning")
      * @ORM\JoinColumn(nullable=false)
      */
     public $moisPlanning;
@@ -65,7 +74,7 @@ class JourPlanning
     /**
      * @var PresenceEnfant[] Les présences enfants
      *
-     * @ORM\OneToMany(targetEntity="PresenceEnfant", mappedBy="jourPlanning")
+     * @ORM\OneToMany(targetEntity=PresenceEnfant::class, mappedBy="jourPlanning")
      *
      * @Groups({"jour_planning"})
      */
@@ -74,7 +83,7 @@ class JourPlanning
     /**
      * @var PresencePro[] Les présences pros
      *
-     * @ORM\OneToMany(targetEntity="PresencePro", mappedBy="jourPlanning")
+     * @ORM\OneToMany(targetEntity=PresencePro::class, mappedBy="jourPlanning")
      *
      * @Groups({"jour_planning"})
      */
@@ -83,7 +92,7 @@ class JourPlanning
     /**
      * @var Garde[] Les gardes parent
      *
-     * @ORM\OneToMany(targetEntity="Garde", mappedBy="jourPlanning")
+     * @ORM\OneToMany(targetEntity=Garde::class, mappedBy="jourPlanning")
      *
      * @Groups({"jour_planning"})
      */

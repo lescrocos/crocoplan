@@ -4,7 +4,9 @@
 namespace App\Repository;
 
 
+use App\Entity\Famille;
 use App\Entity\Garde;
+use App\Entity\MoisPlanning;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ConnectionException;
 use Doctrine\DBAL\DBALException;
@@ -22,17 +24,19 @@ class GardeRepository extends ServiceEntityRepository
         parent::__construct($registry, Garde::class);
     }
 
+
     /**
      * @param string $codeMoisPlanning
      * @return Garde[]
      */
     public function findByJourPlanningMoisPlanningCode(string $codeMoisPlanning): array
     {
-        return $this->getEntityManager()->createQuery('
-            SELECT g FROM App\Entity\Garde g JOIN g.jourPlanning j JOIN j.moisPlanning m
-            WHERE m.code = :codeMoisPlanning
-        ')
+        return $this->createQueryBuilder('garde')
+            ->join('garde.jourPlanning', 'jourPlanning')
+            ->join('jourPlanning.moisPlanning', 'moisPlanning')
+            ->where('moisPlanning.code = :codeMoisPlanning')
             ->setParameter('codeMoisPlanning', $codeMoisPlanning)
+            ->getQuery()
             ->getResult();
     }
 
@@ -141,6 +145,47 @@ class GardeRepository extends ServiceEntityRepository
             $em->getConnection()->rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * @throws DBALException
+     */
+    public function findSumSecondsByFamilleAndMoisPlanning(Famille $famille, MoisPlanning $moisPlanning): int
+    {
+        $em = $this->getEntityManager();
+        $params['familleId'] = $famille->getId();
+        $params['moisPlanningId'] = $moisPlanning->getId();
+        $pdoStatement = $em->getConnection()->executeQuery('
+            SELECT SUM(TIME_TO_SEC(garde.heure_depart) - TIME_TO_SEC(garde.heure_arrivee))
+            FROM garde
+                JOIN jour_planning ON jour_planning.id = garde.jour_planning_id
+                JOIN mois_planning ON mois_planning.id = jour_planning.mois_planning_id
+            WHERE garde.famille_id = :familleId AND mois_planning.id = :moisPlanningId
+                AND jour_planning.creche_ouverte_pour_enfants IS TRUE
+            ', $params);
+        return $pdoStatement->fetchColumn();
+    }
+
+    /**
+     * @throws DBALException
+     */
+    public function findSumSecondsByMoisPlanning(MoisPlanning $moisPlanning): int
+    {
+        $em = $this->getEntityManager();
+        $params['moisPlanningId'] = $moisPlanning->getId();
+        $pdoStatement = $em->getConnection()->executeQuery('
+            SELECT SUM(TIME_TO_SEC(garde.heure_depart) - TIME_TO_SEC(garde.heure_arrivee))
+            FROM garde
+                JOIN jour_planning ON jour_planning.id = garde.jour_planning_id
+                JOIN mois_planning ON mois_planning.id = jour_planning.mois_planning_id
+            WHERE mois_planning.id = :moisPlanningId
+                AND jour_planning.creche_ouverte_pour_enfants IS TRUE
+                AND (
+                    (garde.famille_id IS NOT NULL AND jour_planning.date < NOW())
+                    OR jour_planning.date >= NOW()
+                )
+            ', $params);
+        return $pdoStatement->fetchColumn();
     }
 
 }

@@ -59,7 +59,7 @@ class CoefGardeFamille
     /**
      * @var Famille la famille concerné par ce coef
      *
-     * @ORM\ManyToOne(targetEntity="Famille")
+     * @ORM\ManyToOne(targetEntity=Famille::class)
      * @ORM\JoinColumn(nullable=false)
      */
     public $famille;

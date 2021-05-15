@@ -17,12 +17,11 @@ class MoisPlanningRepository extends ServiceEntityRepository
         parent::__construct($registry, MoisPlanning::class);
     }
 
+
     /**
-     * @param string $code
-     * @return MoisPlanning|null
      * @throws NonUniqueResultException
      */
-    public function findOneByCode(string $code)
+    public function findOneByCode(string $code): ?MoisPlanning
     {
         return $this->getEntityManager()->createQuery('
             SELECT m FROM App\Entity\MoisPlanning m

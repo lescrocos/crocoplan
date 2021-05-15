@@ -11,7 +11,7 @@ mkdir -p ./docker/data/{.symfony,.composer,.config,.quasar-starter-kits,.yarn,.c
 
 Et enfin lancer le projet de cette manière :
 ```bash
-COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 CURRENT_USER=$(id -u):$(id -g) docker-compose -p crocoplan-dev -f docker/docker-compose-dev.yml up
+COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 CURRENT_USER=$(id -u):$(id -g) docker-compose -p crocoplan-dev -f docker/docker-compose-dev.yml up --build
 ```
 
 Pour supprimer les données de la base et la ré-initialiser :

@@ -1,4 +1,4 @@
-import { EnfantGroupeEnfant } from 'src/interfaces/enfant-groupe-enfant';
+import { Contrat } from 'src/interfaces/contrat';
 
 export interface Enfant {
   '@id'?: string
@@ -8,6 +8,6 @@ export interface Enfant {
   debutAdaptation?: Date
   finAdaptation?: Date
   famille?: string
-  groupes?: EnfantGroupeEnfant[]
+  contrats?: Contrat[]
   id?: string
 }

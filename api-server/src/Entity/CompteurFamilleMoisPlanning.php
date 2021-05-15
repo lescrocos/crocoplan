@@ -47,6 +47,55 @@ class CompteurFamilleMoisPlanning
     public $quotaJoursAbsenceForce;
 
     /**
+     * @var float Coefficient total pour le mois de cette famille, avant la division par le nombre de jours de gardes du mois
+     * @ORM\Column(type="float")
+     */
+    public $coefTotal;
+
+    /**
+     * @var float Coefficient pour le mois de cette famille après division par le nombre de jours de gardes du mois
+     * @ORM\Column(type="float")
+     */
+    public $coef;
+
+    /**
+     * @var integer Nombre de secondes de gardes effectuées par la famille sur ce mois de planning
+     * @ORM\Column(type="integer")
+     */
+    public $tempsGardesTotal;
+
+    /**
+     * @var integer Nombre de secondes de gardes à réaliser par la famille sur ce mois de planning
+     * @ORM\Column(type="integer")
+     */
+    public $tempsARealiser;
+
+    /**
+     * @var integer Évolution du compteur de cette famille pour ce mois de planning
+     * @ORM\Column(type="integer")
+     */
+    public $evolutionCompteur;
+
+    /**
+     * @var integer Nombre de secondes de gardes à réaliser par la famille sur ce mois de planning (en tenant compte des gardes non attribuées)
+     * @ORM\Column(type="integer")
+     */
+    public $tempsARealiserNA;
+
+    /**
+     * @var integer Évolution du compteur de cette famille pour ce mois de planning (en tenant compte des gardes non attribuées)
+     * @ORM\Column(type="integer")
+     */
+    public $evolutionCompteurNA;
+
+    /**
+     * @var integer Compteur calculé (en nombre de secondes) de gardes restant à réaliser (si négatif) ou "stocké" (si positif) à la fin de ce mois de planning (en tenant compte des gardes non attribuées)
+     * @ORM\Column(type="integer")
+     */
+    public $compteurNA;
+
+
+    /**
      * @var MoisPlanning le mois planning de ce jour
      *
      * @ORM\ManyToOne(targetEntity=MoisPlanning::class)
@@ -57,7 +106,7 @@ class CompteurFamilleMoisPlanning
     /**
      * @var Famille la famille qui dépose ce commentaire
      *
-     * @ORM\ManyToOne(targetEntity="Famille")
+     * @ORM\ManyToOne(targetEntity=Famille::class)
      * @ORM\JoinColumn(nullable=false)
      */
     public $famille;

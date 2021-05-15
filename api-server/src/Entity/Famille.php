@@ -58,14 +58,14 @@ class Famille
     /**
      * @var Enfant[] Les enfants de la famille
      *
-     * @ORM\OneToMany(targetEntity="Enfant", mappedBy="famille")
+     * @ORM\OneToMany(targetEntity=Enfant::class, mappedBy="famille")
      */
     public $enfants;
 
     /**
      * @var CParent[] Les parents de la famille
      *
-     * @ORM\OneToMany(targetEntity="CParent", mappedBy="famille")
+     * @ORM\OneToMany(targetEntity=CParent::class, mappedBy="famille")
      */
     public $parents;
 

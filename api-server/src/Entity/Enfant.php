@@ -61,24 +61,24 @@ class Enfant
     /**
      * @var Famille La famille de l'enfant
      *
-     * @ORM\ManyToOne(targetEntity="Famille", inversedBy="enfants")
+     * @ORM\ManyToOne(targetEntity=Famille::class, inversedBy="enfants")
      * @ORM\JoinColumn(nullable=false)
      */
     public $famille;
 
     /**
-     * @var EnfantGroupeEnfant[] Les association à des groupes d'enfants de cet enfant
+     * @var Contrat[] Les contrats de cet enfant
      *
-     * @ORM\OneToMany(targetEntity=EnfantGroupeEnfant::class, mappedBy="enfant")
+     * @ORM\OneToMany(targetEntity=Contrat::class, mappedBy="enfant")
      *
      * @Groups({"enfant"})
      */
-    public $groupes;
+    public $contrats;
 
 
     public function __construct()
     {
-        $this->groupes = new ArrayCollection();
+        $this->contrats = new ArrayCollection();
     }
 
 

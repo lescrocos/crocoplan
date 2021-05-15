@@ -1,6 +1,6 @@
 import { GroupeEnfant } from 'src/interfaces/groupe-enfant';
 
-export interface EnfantGroupeEnfant {
+export interface Contrat {
   '@id'?: string
   id?: string
   dateDebut?: string

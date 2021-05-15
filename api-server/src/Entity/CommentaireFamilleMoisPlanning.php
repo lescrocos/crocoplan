@@ -36,7 +36,7 @@ class CommentaireFamilleMoisPlanning
     /**
      * @var MoisPlanning le mois planning de ce jour
      *
-     * @ORM\ManyToOne(targetEntity="MoisPlanning")
+     * @ORM\ManyToOne(targetEntity=MoisPlanning::class)
      * @ORM\JoinColumn(nullable=false)
      */
     public $moisPlanning;
@@ -44,7 +44,7 @@ class CommentaireFamilleMoisPlanning
     /**
      * @var Famille la famille qui dépose ce commentaire
      *
-     * @ORM\ManyToOne(targetEntity="Famille")
+     * @ORM\ManyToOne(targetEntity=Famille::class)
      * @ORM\JoinColumn(nullable=false)
      */
     public $famille;

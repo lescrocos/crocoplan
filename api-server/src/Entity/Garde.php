@@ -81,7 +81,7 @@ class Garde
     /**
      * @var JourPlanning Le jour de planning de cette garde
      *
-     * @ORM\ManyToOne(targetEntity="JourPlanning", inversedBy="gardes")
+     * @ORM\ManyToOne(targetEntity=JourPlanning::class, inversedBy="gardes")
      * @ORM\JoinColumn(nullable=false)
      *
      * @Groups({"garde", "mes_dispos_du_mois"})
@@ -100,7 +100,7 @@ class Garde
     /**
      * @var Famille[] Les familles disponibles pour cette garde
      *
-     * @ORM\ManyToMany(targetEntity="Famille")
+     * @ORM\ManyToMany(targetEntity=Famille::class)
      * @ORM\JoinTable(name="garde_famille_disponible")
      */
     public $famillesDisponibles;

@@ -9,11 +9,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * L'association d'un enfant à un groupe d'enfant
+ * Le contrat de présence à la crèche d'un enfant. Il associe également le groupe de l'enfant.
  * @package App\Entity
  * @ORM\Entity
  */
-class EnfantGroupeEnfant
+class Contrat
 {
     /**
      * @var int ID de l'association
@@ -25,7 +25,7 @@ class EnfantGroupeEnfant
     private $id;
 
     /**
-     * @var DateTime La date du début où l'enfant doit être associé à ce groupe d'enfant
+     * @var DateTime La date du début du contrat de présence de cet enfant à la crèche
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull
@@ -35,7 +35,7 @@ class EnfantGroupeEnfant
     public $dateDebut;
 
     /**
-     * @var DateTime La date de fin où l'enfant doit être associé à ce groupe d'enfant
+     * @var DateTime La date de fin du contrat de présence de cet enfant à la crèche
      *
      * @ORM\Column(type="date")
      * @Assert\NotNull
@@ -45,9 +45,17 @@ class EnfantGroupeEnfant
     public $dateFin;
 
     /**
+     * @var int Nombre de jours par semaine du contrat. Si cette valeur vaut 4 par exemple, il s'agit d'un contrat aux 4/5ème.
+     *
+     * @ORM\Column(type="integer", options={"default": 5})
+     * @Assert\NotNull
+     */
+    public $nbJoursParSemaine = 5;
+
+    /**
      * @var Enfant l'enfant de cette association
      *
-     * @ORM\ManyToOne(targetEntity=Enfant::class, inversedBy="groupes")
+     * @ORM\ManyToOne(targetEntity=Enfant::class, inversedBy="contrats")
      * @ORM\JoinColumn(nullable=false)
      */
     public $enfant;

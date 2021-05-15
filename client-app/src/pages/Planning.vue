@@ -315,10 +315,10 @@ export default class Planning extends Vue {
           presenceAbsence.enfants.add(enfant)
           // Ajout des groupes
           let groupeTrouve = false
-          for (const enfantGroupeEnfant of enfant.groupes) {
-            if (date.isBetweenDates(new Date(jourPlanning.date), new Date(enfantGroupeEnfant.dateDebut as string), new Date(enfantGroupeEnfant.dateFin as string))) {
+          for (const contrat of enfant.contrats) {
+            if (date.isBetweenDates(new Date(jourPlanning.date), new Date(contrat.dateDebut as string), new Date(contrat.dateFin as string))) {
               // la date de ce jour est incluse entre les bornes de déclaration de l'association de l'enfant à ce groupe, on peut le rajouter
-              const groupeNom = enfantGroupeEnfant.groupe?.nom
+              const groupeNom = contrat.groupe?.nom
               if (groupeNom) {
                 this.addEnfantToGroupe(presenceAbsence, groupeNom, enfant)
                 groupeTrouve = true

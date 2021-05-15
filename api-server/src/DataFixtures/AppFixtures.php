@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Enfant;
-use App\Entity\EnfantGroupeEnfant;
+use App\Entity\Contrat;
 use App\Entity\Famille;
 use App\Entity\Garde;
 use App\Entity\GroupeEnfant;
@@ -19,8 +19,8 @@ use DatePeriod;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Exception;
 use Faker;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
 
 class AppFixtures extends Fixture
 {
@@ -40,6 +40,9 @@ class AppFixtures extends Fixture
     }
 
 
+    /**
+     * @throws Exception
+     */
     public function load(ObjectManager $manager)
     {
         $faker = $this->faker;
@@ -88,13 +91,13 @@ class AppFixtures extends Fixture
                     $enfant->nom = $faker->firstName();
                 }
                 $enfant->famille = $famille;
-                $enfantGroupeEnfant = new EnfantGroupeEnfant();
-                $enfantGroupeEnfant->enfant = $enfant;
-                $enfantGroupeEnfant->groupe = $groupesEnfants[floor(sizeof($enfants) * AppFixtures::NOMBRE_DE_GROUPES_D_ENFANTS / AppFixtures::NOMBRE_D_ENFANTS)];
-                $enfantGroupeEnfant->dateDebut = $dateEntree;
-                $enfantGroupeEnfant->dateFin = $dateSortie;
-                $manager->persist($enfantGroupeEnfant);
-                $enfant->groupes[] = $enfantGroupeEnfant;
+                $contrat = new Contrat();
+                $contrat->enfant = $enfant;
+                $contrat->groupe = $groupesEnfants[floor(sizeof($enfants) * AppFixtures::NOMBRE_DE_GROUPES_D_ENFANTS / AppFixtures::NOMBRE_D_ENFANTS)];
+                $contrat->dateDebut = $dateEntree;
+                $contrat->dateFin = $dateSortie;
+                $manager->persist($contrat);
+                $enfant->contrats[] = $contrat;
 
                 $manager->persist($enfant);
                 $enfants[] = $enfant;
@@ -113,13 +116,17 @@ class AppFixtures extends Fixture
         }
 
         // Création des mois planning
+        /** @var ?MoisPlanning $moisPlanningPrecedent */
+        $moisPlanningPrecedent = null;
         $moisPrecedent = new DateTime(date("Y-m-d", strtotime("last month")));
         for ($i = 0; $i < 12; $i++) {
             $moisPlanning = new MoisPlanning();
             $moisPlanning->code = $moisPrecedent->format('Y-m');
             $moisPlanning->dateDebut = new DateTime(date("Y-m-d", strtotime("first monday of {$moisPrecedent->format('Y-m')}")));
             $moisPlanning->dateFin = new DateTime(date("Y-m-d", strtotime("friday this week", strtotime("last monday of {$moisPrecedent->format('Y-m')}"))));
+            $moisPlanning->moisPlanningPrecedent = $moisPlanningPrecedent;
             $manager->persist($moisPlanning);
+            $moisPlanningPrecedent = $moisPlanning;
 
             // Création des jours planning de ce mois
             foreach (new DatePeriod($moisPlanning->dateDebut, DateInterval::createFromDateString('1 day'), $moisPlanning->dateFin->setTime(0, 0, 1)) as $date) { // let setTime permet d'inclure la date de fin, merci à https://stackoverflow.com/a/38226650/535203
@@ -135,9 +142,9 @@ class AppFixtures extends Fixture
 
                     // Ajout des présences des enfants
                     foreach($enfants as $enfant) {
-                        $groupe = $enfant->groupes[0];
-                        if ($date->getTimestamp() >= $groupe->dateDebut->getTimestamp()
-                            && $date->getTimestamp() <= $groupe->dateFin->getTimestamp()) {
+                        $contrat = $enfant->contrats[0];
+                        if ($date->getTimestamp() >= $contrat->dateDebut->getTimestamp()
+                            && $date->getTimestamp() <= $contrat->dateFin->getTimestamp()) {
                             $presenceEnfant = new PresenceEnfant();
                             $presenceEnfant->enfant = $enfant;
                             $presenceEnfant->jourPlanning = $jourPlanning;

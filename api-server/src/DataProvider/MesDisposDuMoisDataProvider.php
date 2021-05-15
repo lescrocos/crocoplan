@@ -35,6 +35,10 @@ class MesDisposDuMoisDataProvider implements ItemDataProviderInterface, Restrict
         return MesDisposDuMois::class === $resourceClass;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws DBALException
+     */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = [])
     {
         $explodedId = explode("_", $id);

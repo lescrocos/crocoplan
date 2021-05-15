@@ -22,8 +22,9 @@ use App\Controller\MoisPlanningController;
  *         "recalculer_compteurs_familles"={
  *             "path"="/mois-plannings/{id}/recalculer-compteurs-familles",
  *             "controller"="App\Controller\MoisPlanningController::recalculerCompteursFamilles",
- *             "method"="get",
- *             "normalization_context"={"groups"="recalculer_compteurs_familles"}
+ *             "method"="put",
+ *             "normalization_context"={"groups"="recalculer_compteurs_familles"},
+ *             "denormalization_context"={"groups"="recalculer_compteurs_familles"},
  *         }
  *     },
  *     collectionOperations={"get"={"controller"=NotFoundAction::class, "read"=false, "output"=false}}
@@ -82,6 +83,20 @@ class MoisPlanning
     public $commentaire;
 
     /**
+     * @var ?int Nombre de jours de quota d'absence famille à ré-initialiser pour chaque famille à la date indiquée par
+     *
+     * @ORM\Column(nullable=true)
+     */
+    public $reinitQuotaJoursAbsenceNombre;
+
+    /**
+     * @var ?DateTime La date du dernier dimanche de ce mois planning
+     *
+     * @ORM\Column(type="date", nullable=true)
+     */
+    public $reinitQuotaJoursAbsenceDate;
+
+    /**
      * @var JourPlanning[] Les jours planning de ce mois
      *
      * @ORM\OneToMany(targetEntity=JourPlanning::class, mappedBy="moisPlanning")
@@ -96,6 +111,13 @@ class MoisPlanning
      * @Groups({"recalculer_compteurs_familles"})
      */
     public $compteursFamilles;
+
+    /**
+     * @var ?MoisPlanning Le mois planning précédent celui-ci
+     *
+     * @ORM\ManyToOne(targetEntity=MoisPlanning::class)
+     */
+    public $moisPlanningPrecedent;
 
 
     public function __construct()

@@ -41,7 +41,7 @@ class CParent
     /**
      * @var Famille La famille du parent
      *
-     * @ORM\ManyToOne(targetEntity="Famille", inversedBy="parents")
+     * @ORM\ManyToOne(targetEntity=Famille::class, inversedBy="parents")
      * @ORM\JoinColumn(nullable=false)
      */
     public $famille;
