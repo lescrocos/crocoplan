@@ -1,4 +1,4 @@
-import { GroupeEnfant } from 'src/interfaces/groupe-enfant';
+import { GroupeEnfant } from 'src/interfaces/groupe-enfant'
 
 export interface Contrat {
   '@id'?: string

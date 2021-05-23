@@ -1,0 +1,52 @@
+version: '3.4'
+
+services:
+  front:
+    image: haproxy:2.4-alpine
+    ports:
+      - "81:80"
+    volumes:
+    - ./front-haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      api_server:
+      client_app:
+
+  api_server:
+    image: crocoplan-api_server-run
+    build:
+      context: ../api-server
+      target: run-stage
+    ports:
+      - "8001:80"
+    environment:
+      HOME: /tmp
+    networks:
+      api_server:
+      db:
+
+  client_app:
+    image: crocoplan-client_app-dev
+    build:
+      context: ../client-app
+      target: run-stage
+    ports:
+      - "8081:80"
+    networks:
+      client_app:
+
+  db:
+    image: mysql:5.6 # mysql:5.6.49
+    environment:
+      - MYSQL_ROOT_PASSWORD=crocoplan
+      - MYSQL_DATABASE=crocoplan
+      - MYSQL_USER=crocoplan
+      - MYSQL_PASSWORD=crocoplan
+    ports:
+      - "3307:3306"
+    networks:
+      db:
+
+networks:
+  api_server:
+  client_app:
+  db:

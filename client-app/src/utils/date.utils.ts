@@ -1,22 +1,21 @@
 import { date } from 'quasar'
 
-export namespace dateUtils {
-  export const Q_DATE_FORMAT = 'YYYY/MM/DD'
+export default class DateUtils {
+  static Q_DATE_FORMAT: 'YYYY/MM/DD'
 
-  export function dateToQDate(dateParam: Date): string {
-    return date.formatDate(dateParam, Q_DATE_FORMAT)
+  static dateToQDate (dateParam: Date | string): string {
+    return date.formatDate(dateParam, this.Q_DATE_FORMAT)
   }
 
-  export function qDateToDate(qDate: string): Date {
-    return date.extractDate(qDate, Q_DATE_FORMAT)
+  static qDateToDate (qDate: string): Date {
+    return date.extractDate(qDate, this.Q_DATE_FORMAT)
   }
 
-  export function dateToHeure(dateParam: Date): string {
+  static dateToHeure (dateParam: Date | string): string {
     return date.formatDate(dateParam, 'HH:mm')
   }
 
-  export function dateToJourComplet(dateParam: Date): string {
+  static dateToJourComplet (dateParam: Date | string): string {
     return date.formatDate(dateParam, 'dddd DD MMMM')
   }
-
 }

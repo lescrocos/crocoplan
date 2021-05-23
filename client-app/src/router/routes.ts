@@ -9,7 +9,7 @@ const routes: RouteConfig[] = [
       { path: 'mes-gardes', component: () => import('pages/MesGardes.vue') },
       { path: 'appels-a-garde', component: () => import('pages/AppelsAGarde.vue') },
       { path: 'mes-dispos', component: () => import('pages/MesDispos.vue') },
-      { path: 'planning', component: () => import('pages/Planning.vue') },
+      { path: 'planning', component: () => import('pages/Planning.vue') }
     ]
   },
 

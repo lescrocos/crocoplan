@@ -1,5 +1,5 @@
-import { JourPlanning } from './jourplanning';
-import { Famille } from 'src/interfaces/famille';
+import { JourPlanning } from './jourplanning'
+import { Famille } from 'src/interfaces/famille'
 
 export interface Garde {
   '@id': string;

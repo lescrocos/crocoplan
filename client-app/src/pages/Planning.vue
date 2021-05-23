@@ -16,7 +16,7 @@
       <div class="col-all">
         <div class="text-h4 q-mb-md">Planning sur la {{titreCalendrier}}</div>
       </div>
-      <q-card v-for="jourPlanningAffichable in joursPlanningAffichables" class="col-all">
+      <q-card v-for="jourPlanningAffichable in joursPlanningAffichables" class="col-all" :key="jourPlanningAffichable.jourDate">
         <q-card-section class="">
           <div class="text-h5 q-mb-md">{{ jourPlanningAffichable.jourDate }}</div>
         </q-card-section>
@@ -31,7 +31,8 @@
                 <th>
                   Commentaire
                 </th>
-                <th v-if="!edit" v-for="titre in horaireTitreColumns" class="titre-horaire-cell" colspan="4">
+                <!-- eslint-disable-next-line vue/no-use-v-if-with-v-for -->
+                <th v-if="!edit" v-for="titre in horaireTitreColumns" class="titre-horaire-cell" colspan="4" :key="titre">
                   {{ titre }}
                 </th>
                 <th v-if="edit">
@@ -41,11 +42,13 @@
             </thead>
             <tbody>
               <template v-for="ligne in jourPlanningAffichable.lignes">
+                <!-- eslint-disable-next-line vue/require-v-for-key -->
                 <tr v-if="ligne.titre" class="titre-ligne-horaire">
                   <td colspan="100%">
                     <div class="text-left">{{ ligne.titre }}</div>
                   </td>
                 </tr>
+                <!-- eslint-disable-next-line vue/require-v-for-key -->
                 <tr class="ligne-horaire">
                   <td>
                     {{ ligne.nom }}&nbsp;
@@ -53,6 +56,7 @@
                   <td>
                     {{ ligne.commentaire }}
                   </td>
+                  <!-- eslint-disable-next-line vue/no-use-v-if-with-v-for,vue/require-v-for-key -->
                   <td v-if="ligne.present && !edit" v-for="horaireColumn in horaireColumns" :class="computeCellHoraireClass(ligne, horaireColumn)">
                     <div v-if="Math.abs(horaireColumn.minRangeValue - ligne.horairesRange.min) < stepMinutes" class="cell-horaire-display-container">
                       <div class="cell-horaire-display">{{ horaireRangeValueToLabel(ligne.horairesRange.min) }}</div>
@@ -92,7 +96,7 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Présences ({{ jourPlanningAffichable.presences.enfants.size }})</div>
               <ul>
-                <li v-for="nomGroupe in Object.keys(jourPlanningAffichable.presences.parGroupes)">
+                <li v-for="nomGroupe in Object.keys(jourPlanningAffichable.presences.parGroupes)" :key="nomGroupe">
                   <span class="text-bold">{{ nomGroupe }} ({{ jourPlanningAffichable.presences.parGroupes[nomGroupe].size }})</span> : {{ Array.from(jourPlanningAffichable.presences.parGroupes[nomGroupe]).map(enfant => enfant.nom).sort().join(', ') }}
                 </li>
               </ul>
@@ -100,7 +104,7 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Absences ({{ jourPlanningAffichable.absences.enfants.size }})</div>
               <ul>
-                <li v-for="nomGroupe in Object.keys(jourPlanningAffichable.absences.parGroupes)">
+                <li v-for="nomGroupe in Object.keys(jourPlanningAffichable.absences.parGroupes)" :key="nomGroupe">
                   <span class="text-bold">{{ nomGroupe }} ({{ jourPlanningAffichable.absences.parGroupes[nomGroupe].size }})</span> : {{ Array.from(jourPlanningAffichable.absences.parGroupes[nomGroupe]).map(enfant => enfant.nom).join(', ') }}
                 </li>
               </ul>
@@ -163,16 +167,17 @@
 </style>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { date } from 'quasar';
-import { dateUtils } from 'src/utils/date.utils';
-import { jourPlanningService } from 'src/services/jour-planning.service';
-import { JourPlanning } from 'src/interfaces/jourplanning';
-import { proStore } from 'src/store/pro.store';
-import { familleStore } from 'src/store/famille.store';
-import { Enfant } from 'src/interfaces/enfant';
-import { enfantStore } from 'src/store/enfant.store';
+import Vue from 'vue'
+import Component from 'vue-class-component'
+import { date, QDate } from 'quasar'
+import DateUtils from 'src/utils/date.utils'
+import { jourPlanningService } from 'src/services/jour-planning.service'
+import { JourPlanning } from 'src/interfaces/jourplanning'
+import { proStore } from 'src/store/pro.store'
+import { familleStore } from 'src/store/famille.store'
+import { Enfant } from 'src/interfaces/enfant'
+import { enfantStore } from 'src/store/enfant.store'
+import { Pro } from 'src/interfaces/pro'
 
 interface JourPlanningAffichableLigne {
   nom?: string
@@ -209,11 +214,11 @@ export default class Planning extends Vue {
   horaireColumns: HoraireColumn[] = []
   horaireTitreColumns: (string|undefined)[] = []
 
-  constructor() {
+  constructor () {
     super()
     // Création des colonnes de la partie horaire d'une ligne
     for (let i = this.heureDebut * 60; i < this.heureFin * 60; i += this.stepMinutes) {
-      this.horaireColumns.push({minRangeValue: i, maxRangeValue: i + this.stepMinutes})
+      this.horaireColumns.push({ minRangeValue: i, maxRangeValue: i + this.stepMinutes })
     }
     // Initialisation des colonnes d'un jour
     this.horaireColumns.forEach(horaireColumn => {
@@ -223,41 +228,42 @@ export default class Planning extends Vue {
     })
   }
 
-  async mounted() {
+  async mounted () {
     await this.initByDate(new Date())
   }
 
-  async navigation(view: {year: number, month: number}) {
-    console.log({view})
+  navigation (view: {year: number, month: number}) {
+    console.log({ view })
   }
 
-  async input(value: string, reason: string, details: {year: number, month: number, day: number}) {
-    const selectedDate = date.buildDate({year: details.year, month: details.month, date: details.day})
+  async input (value: string, reason: string, details: {year: number, month: number, day: number}) {
+    const selectedDate = date.buildDate({ year: details.year, month: details.month, date: details.day })
     await this.initByDate(selectedDate)
   }
 
-  async rangeStart(from: {year: number, month: number, day: number}) {
-    const selectedDate = date.buildDate({year: from.year, month: from.month, date: from.day})
-    await this.initByDate(selectedDate);
+  async rangeStart (from: {year: number, month: number, day: number}) {
+    const selectedDate = date.buildDate({ year: from.year, month: from.month, date: from.day })
+    await this.initByDate(selectedDate)
   }
 
-  private async initByDate(selectedDate: Date) {
+  private async initByDate (selectedDate: Date) {
     this.currentDate = selectedDate
-    const dayOfWeek = date.getDayOfWeek(selectedDate); // Lundi = 1, Dimanche = 7
-    const startOfWeekDate = date.subtractFromDate(selectedDate, {days: dayOfWeek - 1}); // Lundi : on retire 0 jours, Mardi : on retire 1 jours, ...
-    const endOfWeekDate = date.addToDate(date.clone(startOfWeekDate), {days: 6});
-    this.currentRange = {from: dateUtils.dateToQDate(startOfWeekDate), to: dateUtils.dateToQDate(endOfWeekDate)};
-    // On modifie l'"editRange" interne au composant QDate pour lui donner la valeur void 0 (c'est à dire undefined https://stackoverflow.com/a/7452352/535203 ) et lui faire croire qu'il n'y a plus aucune sélection en cours. Cf https://github.com/quasarframework/quasar/blob/5c7b5f298d8216d51646b461653e49493daaa599/ui/src/components/date/QDate.js#L1205
-    this.$refs.calendrier.$data.editRange = void 0;
+    const dayOfWeek = date.getDayOfWeek(selectedDate) // Lundi = 1, Dimanche = 7
+    const startOfWeekDate = date.subtractFromDate(selectedDate, { days: dayOfWeek - 1 }) // Lundi : on retire 0 jours, Mardi : on retire 1 jours, ...
+    const endOfWeekDate = date.addToDate(date.clone(startOfWeekDate), { days: 6 })
+    this.currentRange = { from: DateUtils.dateToQDate(startOfWeekDate), to: DateUtils.dateToQDate(endOfWeekDate) };
+    // On modifie l'"editRange" interne au composant QDate pour lui donner la valeur undefined et lui faire croire qu'il n'y a plus aucune sélection en cours. Cf https://github.com/quasarframework/quasar/blob/5c7b5f298d8216d51646b461653e49493daaa599/ui/src/components/date/QDate.js#L1205
+    (this.$refs.calendrier as QDate).$data.editRange = undefined
     this.titreCalendrier = `Semaine du ${startOfWeekDate.getDate()} ${date.formatDate(startOfWeekDate, 'MMMM')}`
     this.joursPlanning = await jourPlanningService.findAllByDateBetween(startOfWeekDate, endOfWeekDate)
     this.joursPlanningAffichables = []
     const prosById = await proStore.getAllById()
     for (const jourPlanning of this.joursPlanning) {
       const jourPlanningAffichableLignes: JourPlanningAffichableLigne[] = []
+      // eslint-disable-next-line no-unused-expressions
       jourPlanning.presencesPros?.forEach((presencePro, index) => {
         jourPlanningAffichableLignes.push({
-          nom: prosById.get(presencePro.pro.id)?.nom,
+          nom: prosById.get((presencePro.pro as Pro).id)?.nom,
           present: presencePro.present,
           heureArrivee: presencePro.heureArrivee,
           heureDepart: presencePro.heureDepart,
@@ -267,38 +273,40 @@ export default class Planning extends Vue {
           },
           absenceType: presencePro.absenceType,
           commentaire: presencePro.commentaire,
-          titre: index == 0 ? 'Horaires pros' : undefined
+          titre: index === 0 ? 'Horaires pros' : undefined
         })
       })
 
       // Ajout des gardes
       const gardesLignes: JourPlanningAffichableLigne[] = []
       const appelsAGardesLignes: JourPlanningAffichableLigne[] = []
-      for (const garde of jourPlanning.gardes) {
-        const ligne = {
-          present: true,
-          heureArrivee: garde.heureArrivee,
-          heureDepart: garde.heureDepart,
-          horairesRange: {
-            min: this.dateStrToHoraireRangeValue(garde.heureArrivee),
-            max: this.dateStrToHoraireRangeValue(garde.heureDepart)
-          },
-          commentaire: garde.commentaire
-        }
-        if (garde.famille) {
-          // La garde est pourvue
-          gardesLignes.push({
-            nom: (await familleStore.getFamilleById(garde.famille.id))?.nom,
-            titre: gardesLignes.length == 0 ? 'Gardes' : undefined,
-            ...ligne
-          })
-        } else {
-          // La garde est à pourvoir
-          appelsAGardesLignes.push({
-            nom: '',
-            titre: appelsAGardesLignes.length == 0 ? 'Appels à garde' : undefined,
-            ...ligne
-          })
+      if (jourPlanning.gardes) {
+        for (const garde of jourPlanning.gardes) {
+          const ligne = {
+            present: true,
+            heureArrivee: garde.heureArrivee,
+            heureDepart: garde.heureDepart,
+            horairesRange: {
+              min: this.dateStrToHoraireRangeValue(garde.heureArrivee),
+              max: this.dateStrToHoraireRangeValue(garde.heureDepart)
+            },
+            commentaire: garde.commentaire
+          }
+          if (garde.famille) {
+            // La garde est pourvue
+            gardesLignes.push({
+              nom: (await familleStore.getFamilleById(garde.famille.id))?.nom,
+              titre: gardesLignes.length === 0 ? 'Gardes' : undefined,
+              ...ligne
+            })
+          } else {
+            // La garde est à pourvoir
+            appelsAGardesLignes.push({
+              nom: '',
+              titre: appelsAGardesLignes.length === 0 ? 'Appels à garde' : undefined,
+              ...ligne
+            })
+          }
         }
       }
       jourPlanningAffichableLignes.push(...gardesLignes)
@@ -315,13 +323,15 @@ export default class Planning extends Vue {
           presenceAbsence.enfants.add(enfant)
           // Ajout des groupes
           let groupeTrouve = false
-          for (const contrat of enfant.contrats) {
-            if (date.isBetweenDates(new Date(jourPlanning.date), new Date(contrat.dateDebut as string), new Date(contrat.dateFin as string))) {
-              // la date de ce jour est incluse entre les bornes de déclaration de l'association de l'enfant à ce groupe, on peut le rajouter
-              const groupeNom = contrat.groupe?.nom
-              if (groupeNom) {
-                this.addEnfantToGroupe(presenceAbsence, groupeNom, enfant)
-                groupeTrouve = true
+          if (enfant.contrats) {
+            for (const contrat of enfant.contrats) {
+              if (date.isBetweenDates(new Date(jourPlanning.date), new Date(contrat.dateDebut as string), new Date(contrat.dateFin as string))) {
+                // la date de ce jour est incluse entre les bornes de déclaration de l'association de l'enfant à ce groupe, on peut le rajouter
+                const groupeNom = contrat.groupe?.nom
+                if (groupeNom) {
+                  this.addEnfantToGroupe(presenceAbsence, groupeNom, enfant)
+                  groupeTrouve = true
+                }
               }
             }
           }
@@ -334,7 +344,7 @@ export default class Planning extends Vue {
 
       this.joursPlanningAffichables.push({
         jourPlanning,
-        jourDate: dateUtils.dateToJourComplet(jourPlanning.date),
+        jourDate: DateUtils.dateToJourComplet(jourPlanning.date),
         lignes: jourPlanningAffichableLignes,
         presences: presences,
         absences: absences
@@ -342,21 +352,21 @@ export default class Planning extends Vue {
     }
   }
 
-  private addEnfantToGroupe(presenceAbsence: PresencesAbsences, groupeNom: string, enfant: Enfant) {
-    const parGroupe = presenceAbsence.parGroupes[groupeNom] = presenceAbsence.parGroupes[groupeNom] || new Set<Enfant>();
-    parGroupe.add(enfant);
+  private addEnfantToGroupe (presenceAbsence: PresencesAbsences, groupeNom: string, enfant: Enfant) {
+    const parGroupe = presenceAbsence.parGroupes[groupeNom] = presenceAbsence.parGroupes[groupeNom] || new Set<Enfant>()
+    parGroupe.add(enfant)
   }
 
-  horaireRangeValueToLabel(horaireRange?: number): string | undefined {
-    return horaireRange ? parseInt(horaireRange / 60) + 'h' + (horaireRange % 60 || '00') : undefined
+  horaireRangeValueToLabel (horaireRange?: number): string | undefined {
+    return horaireRange ? String(parseInt(String(horaireRange / 60))) + 'h' + (String(horaireRange % 60) || '00') : undefined
   }
 
-  dateStrToHoraireRangeValue(dateStr?: string): number | undefined {
+  dateStrToHoraireRangeValue (dateStr?: string): number | undefined {
     const date = dateStr ? new Date(dateStr) : undefined
     return date ? date.getHours() * 60 + date.getMinutes() : undefined
   }
 
-  computeCellHoraireClass(jourPlanningAffichableLigne: JourPlanningAffichableLigne, horaireColumn: HoraireColumn): string {
+  computeCellHoraireClass (jourPlanningAffichableLigne: JourPlanningAffichableLigne, horaireColumn: HoraireColumn): string {
     const classes: string[] = ['cell-horaire']
 
     if (horaireColumn.minRangeValue % 60 === 0) {
@@ -369,12 +379,11 @@ export default class Planning extends Vue {
     if (horaireColumn.maxRangeValue % 60 === 0) {
       classes.push('fin-heure')
     }
-    if (jourPlanningAffichableLigne.horairesRange.min <= horaireColumn.minRangeValue && horaireColumn.maxRangeValue <= jourPlanningAffichableLigne.horairesRange.max) {
+    if ((jourPlanningAffichableLigne.horairesRange.min !== undefined) && jourPlanningAffichableLigne.horairesRange.min <= horaireColumn.minRangeValue && (jourPlanningAffichableLigne.horairesRange.max !== undefined) && horaireColumn.maxRangeValue <= jourPlanningAffichableLigne.horairesRange.max) {
       classes.push('personne-presente')
     }
 
     return classes.join(' ')
   }
-
 }
 </script>

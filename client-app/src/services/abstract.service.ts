@@ -1,13 +1,13 @@
-import { httpService } from './http.service';
+import { httpService } from './http.service'
 
 abstract class AbstractService<T> {
   private readonly resourcePrefix: string
 
-  protected constructor(resourcePrefix: string) {
+  protected constructor (resourcePrefix: string) {
     this.resourcePrefix = resourcePrefix
   }
 
-  async findAll(): Promise<T[]> {
+  async findAll (): Promise<T[]> {
     return await httpService.get(`${this.resourcePrefix}`)
   }
 }

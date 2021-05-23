@@ -1,4 +1,4 @@
-import { Garde } from 'src/interfaces/garde';
+import { Garde } from 'src/interfaces/garde'
 
 export interface GardeAffichable {
   jour: string;

@@ -75,13 +75,13 @@ const linksData = [
     caption: 'Planning hebdo',
     icon: 'date_range',
     link: '/planning'
-  },
+  }
 ]
 
 import { Vue, Component } from 'vue-property-decorator'
-import { familleStore } from 'src/store/famille.store';
-import { Famille } from 'src/interfaces/famille';
-import { familleService } from 'src/services/famille.service';
+import { familleStore } from 'src/store/famille.store'
+import { Famille } from 'src/interfaces/famille'
+import { familleService } from 'src/services/famille.service'
 
 @Component({
   components: { EssentialLink }
@@ -92,13 +92,12 @@ export default class MainLayout extends Vue {
   familleStore = familleStore;
   familles: Famille[] | null = null
 
-  async created() {
+  async created () {
     this.familles = await familleService.findAll()
   }
 
-  changeFamille(famille: Famille) {
+  changeFamille (famille: Famille) {
     familleStore.selectionneFamille(famille)
   }
-
 }
 </script>

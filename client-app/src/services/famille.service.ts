@@ -1,9 +1,9 @@
-import { Famille } from 'src/interfaces/famille';
-import { AbstractService } from 'src/services/abstract.service';
+import { Famille } from 'src/interfaces/famille'
+import { AbstractService } from 'src/services/abstract.service'
 
 class FamilleService extends AbstractService<Famille> {
-  constructor() {
-    super('/api/familles');
+  constructor () {
+    super('/api/familles')
   }
 }
 

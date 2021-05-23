@@ -1,4 +1,4 @@
-import { Contrat } from 'src/interfaces/contrat';
+import { Contrat } from 'src/interfaces/contrat'
 
 export interface Enfant {
   '@id'?: string

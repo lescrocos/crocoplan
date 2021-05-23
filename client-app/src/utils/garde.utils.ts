@@ -1,22 +1,20 @@
-import { Garde } from 'src/interfaces/garde';
-import { GardeAffichable } from 'src/interfaces/garde-affichable';
-import { dateUtils } from 'src/utils/date.utils';
+import { Garde } from 'src/interfaces/garde'
+import { GardeAffichable } from 'src/interfaces/garde-affichable'
+import DateUtils from 'src/utils/date.utils'
 
-export namespace gardeUtils {
-
-  export function gardeToGardeAffichable(garde: Garde): GardeAffichable {
+export default class GardeUtils {
+  static gardeToGardeAffichable (garde: Garde): GardeAffichable {
     return {
-      jour: dateUtils.dateToJourComplet(garde.jourPlanning.date),
-      heureArrivee: dateUtils.dateToHeure(garde.heureArrivee),
-      heureDepart: dateUtils.dateToHeure(garde.heureDepart),
+      jour: DateUtils.dateToJourComplet(garde.jourPlanning.date),
+      heureArrivee: DateUtils.dateToHeure(garde.heureArrivee),
+      heureDepart: DateUtils.dateToHeure(garde.heureDepart),
       garde: garde
     }
   }
 
-  export function gardesToGardeAffichableMappedByGardeId(gardes: Garde[]): Map<string, GardeAffichable> {
+  static gardesToGardeAffichableMappedByGardeId (gardes: Garde[]): Map<string, GardeAffichable> {
     const map = new Map<string, GardeAffichable>()
-    gardes.forEach(garde => map.set(garde.id, gardeToGardeAffichable(garde)))
+    gardes.forEach(garde => map.set(garde.id, this.gardeToGardeAffichable(garde)))
     return map
   }
-
 }

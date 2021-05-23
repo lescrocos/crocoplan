@@ -40,10 +40,10 @@ ENV APP_ENV=prod \
 
 # Installation des sources pour la prod en suivant la doc https://symfony.com/doc/current/deployment.html
 COPY composer.json composer.lock symfony.lock /api-server/
-RUN composer install --no-dev --no-scripts
+RUN composer install --prefer-dist --no-dev --no-scripts
 
 COPY . /api-server
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --prefer-dist --no-dev --optimize-autoloader
 RUN php bin/console cache:clear
 
 

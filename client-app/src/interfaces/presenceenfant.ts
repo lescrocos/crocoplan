@@ -1,4 +1,4 @@
-import { Enfant } from 'src/interfaces/enfant';
+import { Enfant } from 'src/interfaces/enfant'
 
 export interface PresenceEnfant {
   '@id'?: string;

@@ -1,9 +1,9 @@
-import { AbstractService } from 'src/services/abstract.service';
-import { Pro } from 'src/interfaces/pro';
+import { AbstractService } from 'src/services/abstract.service'
+import { Pro } from 'src/interfaces/pro'
 
 export class ProService extends AbstractService<Pro> {
-  constructor() {
-    super('/api/pros');
+  constructor () {
+    super('/api/pros')
   }
 }
 

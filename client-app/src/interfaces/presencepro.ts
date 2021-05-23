@@ -1,4 +1,4 @@
-import { Pro } from 'src/interfaces/pro';
+import { Pro } from 'src/interfaces/pro'
 
 export interface PresencePro {
   '@id'?: string;

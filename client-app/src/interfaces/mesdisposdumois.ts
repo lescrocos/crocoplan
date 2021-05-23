@@ -1,6 +1,6 @@
-import { MoisPlanning } from 'src/interfaces/moisplanning';
-import { CommentaireFamilleMoisPlanning } from 'src/interfaces/commentairefamillemoisplanning';
-import { Garde } from 'src/interfaces/garde';
+import { MoisPlanning } from 'src/interfaces/moisplanning'
+import { CommentaireFamilleMoisPlanning } from 'src/interfaces/commentairefamillemoisplanning'
+import { Garde } from 'src/interfaces/garde'
 
 export interface MesDisposDuMoisUpdate {
   code?: string;

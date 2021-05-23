@@ -1,5 +1,5 @@
-import { Famille } from 'src/interfaces/famille';
-import { familleService } from 'src/services/famille.service';
+import { Famille } from 'src/interfaces/famille'
+import { familleService } from 'src/services/famille.service'
 
 export interface FamilleStoreState {
   familleSelectionnee?: Famille
@@ -7,13 +7,13 @@ export interface FamilleStoreState {
 }
 
 class FamilleStore {
-  public state:FamilleStoreState = {familleSelectionnee: {}}
+  public state:FamilleStoreState = { familleSelectionnee: {} }
 
-  public selectionneFamille(famille: Famille) {
+  public selectionneFamille (famille: Famille) {
     this.state.familleSelectionnee = famille
   }
 
-  public async getFamilleById(familleId: string | undefined): Promise<Famille | undefined> {
+  public async getFamilleById (familleId: string | undefined): Promise<Famille | undefined> {
     if (familleId) {
       if (!this.state.famillesById) {
         // Chargement de la liste des familles
