@@ -3,17 +3,18 @@ FROM php:7.3-cli-buster as common-stage
 
 # Installation de Composer en suivant https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
 RUN apt update && apt install -y git wget \
- && wget https://raw.githubusercontent.com/composer/getcomposer.org/76a7060ccb93902cd7576b67264ad91c8a2700e2/web/installer -O - -q | php -- --version=1.10.20 --install-dir=/usr/local/bin --filename=composer \
+ && wget https://raw.githubusercontent.com/composer/getcomposer.org/76a7060ccb93902cd7576b67264ad91c8a2700e2/web/installer -O - -q | php -- --version=2.1.2 --install-dir=/usr/local/bin --filename=composer \
 # Installation de Symfony en suivant https://symfony.com/download
  && wget https://get.symfony.com/cli/installer -O - | bash \
  && mv $HOME/.symfony/bin/symfony /usr/local/bin/symfony
 
 # Configurations PHP pour l'application
-RUN apt update && apt install -y libmariadb-dev \
- && docker-php-ext-install pdo_mysql
+RUN apt update && apt install -y p7zip libzip-dev libmariadb-dev \
+ && docker-php-ext-install pdo_mysql zip
 RUN sed -i 's/;extension=sodium/extension=sodium/' /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini-development \
  && sed -i 's/;extension=intl/extension=intl/' /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini-development \
  && sed -i -E 's/^;?memory_limit.*/memory_limit = 512M/' /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini-development \
+ && sed -i -E 's/^;?max_execution_time.*/max_execution_time = 240/' $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini-development \
  && sed -i 's/post_max_size = 8M/post_max_size = 130M/' /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini-development \
  && sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 128M/' /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini-development
 
@@ -42,7 +43,13 @@ ENV APP_ENV=prod \
 COPY composer.json composer.lock symfony.lock /api-server/
 RUN composer install --prefer-dist --no-dev --no-scripts
 
-COPY . /api-server
+COPY bin /api-server/bin
+COPY config /api-server/config
+COPY migrations /api-server/migrations
+COPY public /api-server/public
+COPY src /api-server/src
+COPY templates /api-server/templates
+COPY .env /api-server/
 RUN composer install --prefer-dist --no-dev --optimize-autoloader
 RUN php bin/console cache:clear
 
@@ -65,3 +72,7 @@ COPY --from=common-stage /usr/local/etc/php/php.ini-development /usr/local/etc/p
 COPY --from=build-stage /api-server/ /var/www/html/
 
 RUN chown -R www-data /var/www/html/var
+
+COPY docker/cmd.sh /usr/local/bin/
+
+CMD ["/usr/local/bin/cmd.sh"]

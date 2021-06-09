@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @ORM\Table(name="parent")
  */
-class CParent
+class CParent extends Utilisateur
 {
     /**
      * @var int ID du parent
@@ -21,22 +21,6 @@ class CParent
      * @ORM\Column(type="integer")
      */
     private $id;
-
-    /**
-     * @var string Le nom du parent
-     *
-     * @ORM\Column
-     * @Assert\NotBlank
-     */
-    public $nom;
-
-    /**
-     * @var string|null L'email du parent
-     *
-     * @ORM\Column(nullable=true)
-     * @Assert\Email
-     */
-    public $email;
 
     /**
      * @var Famille La famille du parent

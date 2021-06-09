@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\CParent;
 use App\Entity\Enfant;
 use App\Entity\Contrat;
 use App\Entity\Famille;
@@ -21,6 +22,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 use Faker;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AppFixtures extends Fixture
 {
@@ -32,11 +34,14 @@ class AppFixtures extends Fixture
     const NOMBRE_DE_GROUPES_D_ENFANTS = 3;
     const NOMBRE_DE_PROS = 6;
 
+    private $passwordEncoder;
 
-    public function __construct()
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->faker = Faker\Factory::create('fr_FR');
         $this->faker->seed(1);
+
+        $this->passwordEncoder = $passwordEncoder;
     }
 
 
@@ -108,8 +113,9 @@ class AppFixtures extends Fixture
         $pros = [];
         for ($i = 0; $i < AppFixtures::NOMBRE_DE_PROS; $i++) {
             $pro = new Pro();
-            $pro->nom = $faker->firstName();
-            $pro->email = $faker->email;
+            $pro->setNom($faker->firstName());
+            $pro->setEmail($faker->email);
+            $pro->setPassword($this->passwordEncoder->encodePassword($pro, 'pro'));
 
             $manager->persist($pro);
             $pros[] = $pro;
@@ -195,6 +201,15 @@ class AppFixtures extends Fixture
             $moisPrecedent = new DateTime(date("Y-m-d", strtotime("next month", $moisPrecedent->getTimestamp())));
         }
 
+        // Création des users parents
+        // Création de l'admin
+        $parent = new CParent();
+        $parent->setNom($faker->firstName());
+        $parent->setEmail('admin@planning.lescrocos.fr');
+        $parent->setPassword($this->passwordEncoder->encodePassword($parent, 'admin'));
+        $parent->famille = $familles[0];
+        $manager->persist($parent);
+        $manager->flush();
         $manager->flush();
     }
 

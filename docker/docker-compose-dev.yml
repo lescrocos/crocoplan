@@ -8,14 +8,23 @@ services:
       target: dev-stage
     ports:
       - "8000:8000"
-    command: >
-      bash -x -c 'while ! nc -vz db 3306; do sleep 1; done
-      && XDEBUG_MODE=off composer install
-      && XDEBUG_MODE=off php bin/console doctrine:database:drop --force
-      && XDEBUG_MODE=off php bin/console doctrine:database:create
-      && XDEBUG_MODE=off php bin/console doctrine:schema:update --force
-      && XDEBUG_MODE=off php bin/console doctrine:fixtures:load --append --no-interaction
-      && symfony server:start --no-tls'
+    command: |
+      bash -x -e -c '
+      # Configuration JWT https://api-platform.com/docs/core/jwt/
+      [[ -f config/jwt/private.pem ]] || (
+        mkdir -p config/jwt
+        JWT_PASSPHRASE=${JWT_PASSPHRASE:-$(grep '^JWT_PASSPHRASE=' .env | cut -f 2 -d '=')}
+        echo "$$JWT_PASSPHRASE" | openssl genpkey -out config/jwt/private.pem -pass stdin -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096
+        echo "$$JWT_PASSPHRASE" | openssl pkey -in config/jwt/private.pem -passin stdin -out config/jwt/public.pem -pubout
+        chmod -R 640 config/jwt/*
+      )
+      while ! nc -vz db 3306; do sleep 1; done
+      XDEBUG_MODE=off composer install
+      XDEBUG_MODE=off php bin/console doctrine:database:drop --force
+      XDEBUG_MODE=off php bin/console doctrine:database:create
+      XDEBUG_MODE=off php bin/console doctrine:schema:update --force
+      XDEBUG_MODE=off php bin/console doctrine:fixtures:load --append --no-interaction
+      symfony server:start --no-tls'
     environment:
       HOME: /tmp
       # See https://docs.docker.com/docker-for-mac/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host

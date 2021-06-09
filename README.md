@@ -31,7 +31,7 @@ docker exec -i crocoplan-dev_db_1 mysqldump -u crocoplan -pcrocoplan crocoplan |
 ```
 
 ## Extraction des fichiers de PROD (pour une sorte de build en local)
-Après avoir lancé l'application en mode PROD (RUN), lancez les commandes suivantes à la ine du projet :
+Après avoir lancé l'application en mode PROD (RUN), lancez les commandes suivantes à la racine du projet :
 ```bash
 rm -rf build
 docker cp crocoplan-run_api_server_1:/var/www/html build
