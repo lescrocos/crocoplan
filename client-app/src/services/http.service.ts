@@ -1,53 +1,53 @@
+import { authentificationService } from 'src/services/authentification.service';
+
 class HttpService {
   static jwt: string | null = null
   static tokenResponse: Promise<string> | null = null
 
   async get<T> (resource: string): Promise<T> {
-    const response = await fetch(resource, {
-      headers: {
-        Accept: 'application/json',
-        Authorization: await this.getAuthorizationHeaderValue()
-      }
+    return this.handleFetch(resource, {
+      headers: this.createHeaders()
     })
+  }
+
+  async handleFetch<T> (resource: string, init?: RequestInit): Promise<T> {
+    const response = await fetch(resource, init)
+    if (!response.ok) {
+      throw new Error('Erreur ' + response.status + ' (' + response.statusText + ' ' + JSON.stringify(await response.json()) + ')')
+    }
     return await response.json() as T
+  }
+
+  private createHeaders(headers?: any) {
+    headers = {
+      Accept: 'application/json',
+      ...(headers || {})
+    }
+    console.log({authentificationState: authentificationService.state})
+    if (authentificationService.state.jwt) {
+      headers['Authorization'] = 'Bearer ' + authentificationService.state.jwt
+    }
+    return headers
   }
 
   async put<T> (resource: string, body: any): Promise<T> {
-    const response = await fetch(resource, {
+    return this.handleFetch(resource, {
       method: 'PUT',
-      headers: {
-        Accept: 'application/json',
+      headers: this.createHeaders({
         'Content-Type': 'application/json',
-        Authorization: await this.getAuthorizationHeaderValue()
-      },
+      }),
       body: JSON.stringify(body)
     })
-    return await response.json() as T
   }
 
-  async getAuthorizationHeaderValue (): Promise<string> {
-    if (!HttpService.jwt) {
-      if (!HttpService.tokenResponse) {
-        HttpService.tokenResponse = (async function () {
-          const response = await fetch('/api/jwt-auth', {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              email: 'admin@planning.lescrocos.fr',
-              password: 'admin'
-            })
-          })
-          const tokenResponse = await response.json() as { token: string }
-          HttpService.tokenResponse = null
-          return tokenResponse.token
-        })()
-      }
-      HttpService.jwt = await HttpService.tokenResponse
-    }
-    return 'Bearer ' + HttpService.jwt
+  async post<T> (resource: string, body: any): Promise<T> {
+    return this.handleFetch(resource, {
+      method: 'POST',
+      headers: this.createHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(body)
+    })
   }
 }
 

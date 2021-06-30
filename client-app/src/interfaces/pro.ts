@@ -1,7 +1,4 @@
-export interface Pro {
-  '@id'?: string;
-  nom: string;
-  email?: string;
-  presences?: string[];
-  id: string;
+import { Utilisateur } from 'src/interfaces/utilisateur'
+
+export interface Pro extends Utilisateur {
 }

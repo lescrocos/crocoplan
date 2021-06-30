@@ -9,15 +9,16 @@
           icon="menu"
           aria-label="Menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
+          v-if="authentificationService.state.utilisateur"
         />
 
         <q-toolbar-title>
           Planning Crocos
         </q-toolbar-title>
 
-        <q-select filled :value="familleStore.state.familleSelectionnee" :options="familles" label="Famille" option-label="nom" @input="changeFamille" />
+        <div v-if="authentificationService.state.utilisateur">{{ authentificationService.state.utilisateur.nom }}</div>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div hidden="hidden">Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
@@ -26,6 +27,7 @@
       show-if-above
       bordered
       content-class="bg-grey-1"
+      v-if="authentificationService.state.utilisateur"
     >
       <q-list>
         <q-item-label
@@ -43,13 +45,16 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view v-if="authentificationService.state.utilisateur"/>
+      <Login v-else>
+      </Login>
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
 import EssentialLink from 'components/EssentialLink.vue'
+import Login from 'pages/Login.vue'
 
 const linksData = [
   {
@@ -82,15 +87,26 @@ import { Vue, Component } from 'vue-property-decorator'
 import { familleStore } from 'src/store/famille.store'
 import { Famille } from 'src/interfaces/famille'
 import { familleService } from 'src/services/famille.service'
+import { authentificationService } from 'src/services/authentification.service'
+import { Notify } from 'quasar';
+
+Vue.config.errorHandler = (err: Error, vm, info: string) => {
+  console.log('toto ' + err)
+  Notify.create({
+    type: 'negative',
+    message: err.message
+  })
+}
 
 @Component({
-  components: { EssentialLink }
+  components: { EssentialLink, Login }
 })
 export default class MainLayout extends Vue {
   leftDrawerOpen = false;
   essentialLinks = linksData;
   familleStore = familleStore;
   familles: Famille[] | null = null
+  authentificationService = authentificationService
 
   async created () {
     this.familles = await familleService.findAll()
