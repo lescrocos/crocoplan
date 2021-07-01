@@ -6,25 +6,34 @@ namespace App\DataPersister;
 
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 use App\DataProvider\MesDisposDuMoisDataProvider;
+use App\Entity\CParent;
 use App\Entity\NoDb\MesDisposDuMois;
+use App\Entity\Utilisateur;
 use App\Repository\GardeRepository;
 use Doctrine\DBAL\ConnectionException;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Component\Security\Core\Security;
 
 class MesDisposDuMoisDataPersister implements ContextAwareDataPersisterInterface
 {
     private $gardeRepository;
     private $mesDisposDuMoisDataProvider;
+    private $security;
 
     public function __construct(
         GardeRepository $gardeRepository,
-        MesDisposDuMoisDataProvider $mesDisposDuMoisDataProvider
+        MesDisposDuMoisDataProvider $mesDisposDuMoisDataProvider,
+        Security $security
     )
     {
         $this->gardeRepository = $gardeRepository;
         $this->mesDisposDuMoisDataProvider = $mesDisposDuMoisDataProvider;
+        $this->security = $security;
     }
 
 
@@ -44,16 +53,22 @@ class MesDisposDuMoisDataPersister implements ContextAwareDataPersisterInterface
      */
     public function persist($data, array $context = [])
     {
+        $user = $this->security->getUser();
+        if (empty($user)) {
+            throw new UnauthorizedHttpException();
+        } else if (!$user instanceof CParent) {
+            throw new AccessDeniedHttpException();
+        }
+
         $mesDisposDuMois = $data;
 
-        $explodedId = explode("_", $mesDisposDuMois->code);
-        $codeMoisPlanning = $explodedId[0];
-        $idFamille = $explodedId[1];
+        $codeMoisPlanning = $mesDisposDuMois->code;
+        $idFamille = $user->famille->getId();
 
         $this->gardeRepository->setFamilleDisponibleByIdFamilleAndIdsGardesAndCodeMoisPlanning(
-          $idFamille,
-          $mesDisposDuMois->gardesDisponiblesIds,
-          $codeMoisPlanning
+            $idFamille,
+            $mesDisposDuMois->gardesDisponiblesIds,
+            $codeMoisPlanning
         );
 
         return $this->mesDisposDuMoisDataProvider->getMesDisposDuMois($codeMoisPlanning, $idFamille);

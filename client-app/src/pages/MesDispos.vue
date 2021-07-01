@@ -35,8 +35,6 @@ import Component from 'vue-class-component'
 import { Garde } from 'src/interfaces/garde'
 import { date } from 'quasar'
 import DateUtils from 'src/utils/date.utils'
-import { familleStore } from 'src/store/famille.store'
-import { Watch } from 'vue-property-decorator'
 import { mesDisposDuMoisService } from 'src/services/mes-dispos-du-mois.service'
 import { MesDisposDuMois } from 'src/interfaces/mesdisposdumois'
 import { GardeAffichable } from 'src/interfaces/garde-affichable'
@@ -61,8 +59,6 @@ export default class MesDispos extends Vue {
   gardesDisponibles: GardeDisponible[] = []
   gardesDisponiblesByJourPlanningQDate: Map<string, GardeDisponible[]> = new Map<string, GardeDisponible[]>()
 
-  familleStore = familleStore
-
   async created () {
     await this.initByDate(new Date())
   }
@@ -73,20 +69,16 @@ export default class MesDispos extends Vue {
     this.jourMois = DateUtils.dateToJourComplet(initDate)
     const nomMois = date.formatDate(initDate, 'MMMM')
     const annee = initDate.getFullYear()
-    const familleId = familleStore.state.familleSelectionnee?.id
 
-    if (nomMois !== this.nomMois || annee !== this.annee || familleId !== this.familleId) {
+    if (nomMois !== this.nomMois || annee !== this.annee) {
       this.nomMois = nomMois
       this.annee = annee
-      this.familleId = familleId
 
       const numMois = date.formatDate(initDate, 'MM')
 
-      if (familleId !== undefined) {
-        // On récupère les dispos du mois
-        const mesDisposDuMois = await mesDisposDuMoisService.findOneByCodeMoisPlanningAndIdFamille(`${annee}-${numMois}`, familleId)
-        this.initMesDisposDuMois(mesDisposDuMois)
-      }
+      // On récupère les dispos du mois
+      const mesDisposDuMois = await mesDisposDuMoisService.findOneByCodeMoisPlanningAndIdFamille(`${annee}-${numMois}`)
+      this.initMesDisposDuMois(mesDisposDuMois)
     }
   }
 
@@ -128,11 +120,6 @@ export default class MesDispos extends Vue {
 
   async navigation (view: {year: number, month: number}) {
     await this.initByDate(date.buildDate(view) as unknown as Date) // TODO supprimer le cast dès que https://github.com/quasarframework/quasar/pull/7888 est rentré dans la version courante
-  }
-
-  @Watch('familleStore.state.familleSelectionnee')
-  async familleSelectionnee () {
-    await this.initByDate(this.dateObj || new Date())
   }
 
   async sauvegarder () {

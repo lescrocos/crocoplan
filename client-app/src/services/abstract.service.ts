@@ -1,7 +1,7 @@
 import { httpService } from './http.service'
 
 abstract class AbstractService<T> {
-  private readonly resourcePrefix: string
+  protected readonly resourcePrefix: string
 
   protected constructor (resourcePrefix: string) {
     this.resourcePrefix = resourcePrefix

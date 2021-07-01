@@ -1,7 +1,5 @@
-export interface Parent {
-  '@id'?: string;
-  nom: string;
-  email?: string;
+import { Utilisateur } from 'src/interfaces/utilisateur'
+
+export interface Parent extends Utilisateur {
   famille?: string;
-  id?: string;
 }

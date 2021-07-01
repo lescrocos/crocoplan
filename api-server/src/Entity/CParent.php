@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -19,6 +20,8 @@ class CParent extends Utilisateur
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *
+     * @Groups("authentication_success")
      */
     private $id;
 
@@ -27,6 +30,8 @@ class CParent extends Utilisateur
      *
      * @ORM\ManyToOne(targetEntity=Famille::class, inversedBy="parents")
      * @ORM\JoinColumn(nullable=false)
+     *
+     * @Groups("authentication_success")
      */
     public $famille;
 

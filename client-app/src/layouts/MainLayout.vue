@@ -9,15 +9,22 @@
           icon="menu"
           aria-label="Menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
+          v-if="authentificationService.state.utilisateur"
         />
 
         <q-toolbar-title>
           Planning Crocos
         </q-toolbar-title>
 
-        <q-select filled :value="familleStore.state.familleSelectionnee" :options="familles" label="Famille" option-label="nom" @input="changeFamille" />
+        <q-btn-dropdown v-if="authentificationService.state.utilisateur" :label="authentificationService.state.utilisateur.nom">
+          <q-list>
+            <q-item clickable @click="logout">
+              <q-item-section>Se déconnecter</q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div hidden="hidden">Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
@@ -26,6 +33,7 @@
       show-if-above
       bordered
       content-class="bg-grey-1"
+      v-if="authentificationService.state.utilisateur"
     >
       <q-list>
         <q-item-label
@@ -43,13 +51,18 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view v-if="authentificationService.state.utilisateur"/>
+      <Login v-else>
+      </Login>
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
 import EssentialLink from 'components/EssentialLink.vue'
+import Login from 'pages/Login.vue'
+import { Component, Vue } from 'vue-property-decorator'
+import { authentificationService } from 'src/services/authentification.service'
 
 const linksData = [
   {
@@ -78,26 +91,16 @@ const linksData = [
   }
 ]
 
-import { Vue, Component } from 'vue-property-decorator'
-import { familleStore } from 'src/store/famille.store'
-import { Famille } from 'src/interfaces/famille'
-import { familleService } from 'src/services/famille.service'
-
 @Component({
-  components: { EssentialLink }
+  components: { EssentialLink, Login }
 })
 export default class MainLayout extends Vue {
-  leftDrawerOpen = false;
-  essentialLinks = linksData;
-  familleStore = familleStore;
-  familles: Famille[] | null = null
+  leftDrawerOpen = false
+  essentialLinks = linksData
+  authentificationService = authentificationService
 
-  async created () {
-    this.familles = await familleService.findAll()
-  }
-
-  changeFamille (famille: Famille) {
-    familleStore.selectionneFamille(famille)
+  logout() {
+    authentificationService.logout()
   }
 }
 </script>

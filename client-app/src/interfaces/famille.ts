@@ -7,5 +7,5 @@ export interface Famille {
   parents?: string[];
   gardes?: string[];
   gardesDisponibles?: string[];
-  id?: string;
+  id?: number;
 }

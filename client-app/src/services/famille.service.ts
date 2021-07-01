@@ -1,7 +1,7 @@
 import { Famille } from 'src/interfaces/famille'
-import { AbstractService } from 'src/services/abstract.service'
+import { SimpleAbstractNumberEntityService } from 'src/services/abstract-entity.service'
 
-class FamilleService extends AbstractService<Famille> {
+class FamilleService extends SimpleAbstractNumberEntityService<Famille> {
   constructor () {
     super('/api/familles')
   }

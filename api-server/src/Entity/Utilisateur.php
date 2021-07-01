@@ -2,9 +2,12 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiProperty;
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -27,6 +30,8 @@ abstract class Utilisateur implements UserInterface
      * @var string L'email de l'utilisateur
      * @ORM\Column(type="string", length=180, unique=true)
      * @Assert\Email
+     *
+     * @Groups("authentication_success")
      */
     private $email;
 
@@ -35,11 +40,15 @@ abstract class Utilisateur implements UserInterface
      *
      * @ORM\Column
      * @Assert\NotBlank
+     *
+     * @Groups("authentication_success")
      */
     private $nom;
 
     /**
      * @ORM\Column(type="json")
+     *
+     * @Groups("authentication_success")
      */
     private $roles = [];
 

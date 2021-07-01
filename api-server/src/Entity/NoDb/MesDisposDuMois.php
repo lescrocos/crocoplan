@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class MesDisposDuMois
 {
     /**
-     * @var string Code du mois au format "Y-m" suivi de "_" puis l'ID de la famille
+     * @var string Code du mois au format "Y-m"
      * @ApiProperty(identifier=true)
      *
      * @Groups({"mes_dispos_du_mois"})

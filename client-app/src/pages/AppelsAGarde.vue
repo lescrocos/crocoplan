@@ -31,7 +31,6 @@ import { Garde } from 'src/interfaces/garde'
 import { date } from 'quasar'
 import { gardeService } from 'src/services/garde.service'
 import DateUtils from 'src/utils/date.utils'
-import { familleStore } from 'src/store/famille.store'
 
 @Component
 export default class AppelsAGarde extends Vue {
@@ -43,8 +42,6 @@ export default class AppelsAGarde extends Vue {
   gardes: Garde[] = []
   events: string[] = []
   gardesDetails: {id: string, jour: string, heureArrivee: string, heureDepart: string, commentaire?: string}[] = []
-
-  familleStore = familleStore
 
   async created () {
     await this.initByDate(new Date())

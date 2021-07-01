@@ -31,8 +31,7 @@ import { Garde } from 'src/interfaces/garde'
 import { date } from 'quasar'
 import { gardeService } from 'src/services/garde.service'
 import DateUtils from 'src/utils/date.utils'
-import { familleStore } from 'src/store/famille.store'
-import { Watch } from 'vue-property-decorator'
+import { authentificationService } from 'src/services/authentification.service'
 
 @Component
 export default class MesGardes extends Vue {
@@ -41,12 +40,10 @@ export default class MesGardes extends Vue {
   nomMois?: string
   jourMois = ''
   annee?: number
-  familleId?: string
+  familleId?: number
   gardes: Garde[] = []
   events: string[] = []
   gardesDetails: {id: string, jour: string, heureArrivee: string, heureDepart: string, commentaire?: string}[] = []
-
-  familleStore = familleStore
 
   async created () {
     await this.initByDate(new Date())
@@ -58,7 +55,7 @@ export default class MesGardes extends Vue {
     this.jourMois = DateUtils.dateToJourComplet(initDate)
     const nomMois = date.formatDate(initDate, 'MMMM')
     const annee = initDate.getFullYear()
-    const familleId = familleStore.state.familleSelectionnee?.id
+    const familleId = authentificationService.state.famille?.id
 
     if (familleId && (nomMois !== this.nomMois || annee !== this.annee || familleId !== this.familleId)) {
       this.nomMois = nomMois
@@ -89,11 +86,6 @@ export default class MesGardes extends Vue {
 
   async navigation (view: {year: number, month: number}) {
     await this.initByDate(date.buildDate(view) as unknown as Date) // TODO supprimer le cast dès que https://github.com/quasarframework/quasar/pull/7888 est rentré dans la version courante
-  }
-
-  @Watch('familleStore.state.familleSelectionnee')
-  async familleSelectionnee () {
-    await this.initByDate(this.dateObj || new Date())
   }
 }
 </script>

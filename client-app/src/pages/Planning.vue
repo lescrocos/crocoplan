@@ -174,10 +174,10 @@ import DateUtils from 'src/utils/date.utils'
 import { jourPlanningService } from 'src/services/jour-planning.service'
 import { JourPlanning } from 'src/interfaces/jourplanning'
 import { proStore } from 'src/store/pro.store'
-import { familleStore } from 'src/store/famille.store'
 import { Enfant } from 'src/interfaces/enfant'
 import { enfantStore } from 'src/store/enfant.store'
 import { Pro } from 'src/interfaces/pro'
+import { familleService } from 'src/services/famille.service'
 
 interface JourPlanningAffichableLigne {
   nom?: string
@@ -292,10 +292,10 @@ export default class Planning extends Vue {
             },
             commentaire: garde.commentaire
           }
-          if (garde.famille) {
+          if (garde.famille && garde.famille.id) {
             // La garde est pourvue
             gardesLignes.push({
-              nom: (await familleStore.getFamilleById(garde.famille.id))?.nom,
+              nom: (await familleService.getById(garde.famille.id)).nom,
               titre: gardesLignes.length === 0 ? 'Gardes' : undefined,
               ...ligne
             })

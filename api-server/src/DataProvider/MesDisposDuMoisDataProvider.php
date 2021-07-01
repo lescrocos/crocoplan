@@ -6,28 +6,35 @@ namespace App\DataProvider;
 
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
+use App\Entity\CParent;
 use App\Entity\NoDb\MesDisposDuMois;
 use App\Repository\CommentaireFamilleMoisPlanningRepository;
 use App\Repository\GardeRepository;
 use App\Repository\MoisPlanningRepository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Component\Security\Core\Security;
 
 class MesDisposDuMoisDataProvider implements ItemDataProviderInterface, RestrictedDataProviderInterface
 {
     private $gardeRepository;
     private $moisPlanningRepository;
     private $commentaireFamilleMoisPlanningRepository;
+    private $security;
 
     public function __construct(
         GardeRepository $gardeRepository,
         MoisPlanningRepository $moisPlanningRepository,
-        CommentaireFamilleMoisPlanningRepository $commentaireFamilleMoisPlanningRepository
+        CommentaireFamilleMoisPlanningRepository $commentaireFamilleMoisPlanningRepository,
+        Security $security
     )
     {
         $this->gardeRepository = $gardeRepository;
         $this->moisPlanningRepository = $moisPlanningRepository;
         $this->commentaireFamilleMoisPlanningRepository = $commentaireFamilleMoisPlanningRepository;
+        $this->security = $security;
     }
 
     public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
@@ -41,9 +48,15 @@ class MesDisposDuMoisDataProvider implements ItemDataProviderInterface, Restrict
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = [])
     {
-        $explodedId = explode("_", $id);
-        $codeMoisPlanning = $explodedId[0];
-        $idFamille = $explodedId[1];
+        $user = $this->security->getUser();
+        if (empty($user)) {
+            throw new UnauthorizedHttpException();
+        } else if (!$user instanceof CParent) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $codeMoisPlanning = $id;
+        $idFamille = $user->famille->getId();
 
         if ($operationName == "get") {
             return $this->getMesDisposDuMois($codeMoisPlanning, $idFamille);
@@ -63,7 +76,7 @@ class MesDisposDuMoisDataProvider implements ItemDataProviderInterface, Restrict
     public function getMesDisposDuMois(string $codeMoisPlanning, string $idFamille): MesDisposDuMois
     {
         $mesDisposDuMois = new MesDisposDuMois();
-        $mesDisposDuMois->code = $codeMoisPlanning . "_" . $idFamille;
+        $mesDisposDuMois->code = $codeMoisPlanning;
 
         // Ajout du mois
         $mesDisposDuMois->moisPlanning = $this->moisPlanningRepository->findOneByCode($codeMoisPlanning);
